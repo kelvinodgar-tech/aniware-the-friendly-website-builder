@@ -47,6 +47,12 @@ export function Header() {
           <Link to="/browse" className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors" activeProps={{ className: "text-foreground" }}>
             Browse
           </Link>
+          <Link to="/genres" className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors" activeProps={{ className: "text-foreground" }}>
+            Genres
+          </Link>
+          <Link to="/schedule" className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors" activeProps={{ className: "text-foreground" }}>
+            Schedule
+          </Link>
         </nav>
 
         <form
@@ -83,6 +89,9 @@ export function Header() {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/history"><History className="w-4 h-4 mr-2" />Continue watching</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/profile"><UserIcon className="w-4 h-4 mr-2" />Profile</Link>
                 </DropdownMenuItem>
                 {isAdmin && (
                   <DropdownMenuItem asChild>

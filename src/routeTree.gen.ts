@@ -9,12 +9,21 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as ScheduleRouteImport } from './routes/schedule'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as GenresRouteImport } from './routes/genres'
+import { Route as DmcaRouteImport } from './routes/dmca'
 import { Route as BrowseRouteImport } from './routes/browse'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as GenreGenreIdRouteImport } from './routes/genre.$genreId'
 import { Route as AnimeMalIdRouteImport } from './routes/anime.$malId'
 import { Route as AuthenticatedWatchlistRouteImport } from './routes/_authenticated.watchlist'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated.profile'
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated.history'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
 import { Route as WatchMalIdEpisodeRouteImport } from './routes/watch.$malId.$episode'
@@ -22,14 +31,49 @@ import { Route as DownloadMalIdEpisodeRouteImport } from './routes/download.$mal
 import { Route as ApiPublicScoutRouteImport } from './routes/api/public/scout'
 import { Route as ApiPublicHealthCheckRouteImport } from './routes/api/public/health-check'
 
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ScheduleRoute = ScheduleRouteImport.update({
+  id: '/schedule',
+  path: '/schedule',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GenresRoute = GenresRouteImport.update({
+  id: '/genres',
+  path: '/genres',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DmcaRoute = DmcaRouteImport.update({
+  id: '/dmca',
+  path: '/dmca',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BrowseRoute = BrowseRouteImport.update({
   id: '/browse',
   path: '/browse',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
@@ -41,6 +85,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GenreGenreIdRoute = GenreGenreIdRouteImport.update({
+  id: '/genre/$genreId',
+  path: '/genre/$genreId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AnimeMalIdRoute = AnimeMalIdRouteImport.update({
   id: '/anime/$malId',
   path: '/anime/$malId',
@@ -49,6 +98,11 @@ const AnimeMalIdRoute = AnimeMalIdRouteImport.update({
 const AuthenticatedWatchlistRoute = AuthenticatedWatchlistRouteImport.update({
   id: '/watchlist',
   path: '/watchlist',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedHistoryRoute = AuthenticatedHistoryRouteImport.update({
@@ -84,12 +138,21 @@ const ApiPublicHealthCheckRoute = ApiPublicHealthCheckRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/browse': typeof BrowseRoute
+  '/dmca': typeof DmcaRoute
+  '/genres': typeof GenresRoute
   '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
+  '/schedule': typeof ScheduleRoute
+  '/search': typeof SearchRoute
+  '/terms': typeof TermsRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/history': typeof AuthenticatedHistoryRoute
+  '/profile': typeof AuthenticatedProfileRoute
   '/watchlist': typeof AuthenticatedWatchlistRoute
   '/anime/$malId': typeof AnimeMalIdRoute
+  '/genre/$genreId': typeof GenreGenreIdRoute
   '/api/public/health-check': typeof ApiPublicHealthCheckRoute
   '/api/public/scout': typeof ApiPublicScoutRoute
   '/download/$malId/$episode': typeof DownloadMalIdEpisodeRoute
@@ -97,12 +160,21 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/browse': typeof BrowseRoute
+  '/dmca': typeof DmcaRoute
+  '/genres': typeof GenresRoute
   '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
+  '/schedule': typeof ScheduleRoute
+  '/search': typeof SearchRoute
+  '/terms': typeof TermsRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/history': typeof AuthenticatedHistoryRoute
+  '/profile': typeof AuthenticatedProfileRoute
   '/watchlist': typeof AuthenticatedWatchlistRoute
   '/anime/$malId': typeof AnimeMalIdRoute
+  '/genre/$genreId': typeof GenreGenreIdRoute
   '/api/public/health-check': typeof ApiPublicHealthCheckRoute
   '/api/public/scout': typeof ApiPublicScoutRoute
   '/download/$malId/$episode': typeof DownloadMalIdEpisodeRoute
@@ -112,12 +184,21 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/about': typeof AboutRoute
   '/browse': typeof BrowseRoute
+  '/dmca': typeof DmcaRoute
+  '/genres': typeof GenresRoute
   '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
+  '/schedule': typeof ScheduleRoute
+  '/search': typeof SearchRoute
+  '/terms': typeof TermsRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
+  '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/watchlist': typeof AuthenticatedWatchlistRoute
   '/anime/$malId': typeof AnimeMalIdRoute
+  '/genre/$genreId': typeof GenreGenreIdRoute
   '/api/public/health-check': typeof ApiPublicHealthCheckRoute
   '/api/public/scout': typeof ApiPublicScoutRoute
   '/download/$malId/$episode': typeof DownloadMalIdEpisodeRoute
@@ -127,12 +208,21 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/browse'
+    | '/dmca'
+    | '/genres'
     | '/login'
+    | '/privacy'
+    | '/schedule'
+    | '/search'
+    | '/terms'
     | '/admin'
     | '/history'
+    | '/profile'
     | '/watchlist'
     | '/anime/$malId'
+    | '/genre/$genreId'
     | '/api/public/health-check'
     | '/api/public/scout'
     | '/download/$malId/$episode'
@@ -140,12 +230,21 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/browse'
+    | '/dmca'
+    | '/genres'
     | '/login'
+    | '/privacy'
+    | '/schedule'
+    | '/search'
+    | '/terms'
     | '/admin'
     | '/history'
+    | '/profile'
     | '/watchlist'
     | '/anime/$malId'
+    | '/genre/$genreId'
     | '/api/public/health-check'
     | '/api/public/scout'
     | '/download/$malId/$episode'
@@ -154,12 +253,21 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/about'
     | '/browse'
+    | '/dmca'
+    | '/genres'
     | '/login'
+    | '/privacy'
+    | '/schedule'
+    | '/search'
+    | '/terms'
     | '/_authenticated/admin'
     | '/_authenticated/history'
+    | '/_authenticated/profile'
     | '/_authenticated/watchlist'
     | '/anime/$malId'
+    | '/genre/$genreId'
     | '/api/public/health-check'
     | '/api/public/scout'
     | '/download/$malId/$episode'
@@ -169,9 +277,17 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  AboutRoute: typeof AboutRoute
   BrowseRoute: typeof BrowseRoute
+  DmcaRoute: typeof DmcaRoute
+  GenresRoute: typeof GenresRoute
   LoginRoute: typeof LoginRoute
+  PrivacyRoute: typeof PrivacyRoute
+  ScheduleRoute: typeof ScheduleRoute
+  SearchRoute: typeof SearchRoute
+  TermsRoute: typeof TermsRoute
   AnimeMalIdRoute: typeof AnimeMalIdRoute
+  GenreGenreIdRoute: typeof GenreGenreIdRoute
   ApiPublicHealthCheckRoute: typeof ApiPublicHealthCheckRoute
   ApiPublicScoutRoute: typeof ApiPublicScoutRoute
   DownloadMalIdEpisodeRoute: typeof DownloadMalIdEpisodeRoute
@@ -180,6 +296,34 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/schedule': {
+      id: '/schedule'
+      path: '/schedule'
+      fullPath: '/schedule'
+      preLoaderRoute: typeof ScheduleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -187,11 +331,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/genres': {
+      id: '/genres'
+      path: '/genres'
+      fullPath: '/genres'
+      preLoaderRoute: typeof GenresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dmca': {
+      id: '/dmca'
+      path: '/dmca'
+      fullPath: '/dmca'
+      preLoaderRoute: typeof DmcaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/browse': {
       id: '/browse'
       path: '/browse'
       fullPath: '/browse'
       preLoaderRoute: typeof BrowseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -208,6 +373,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/genre/$genreId': {
+      id: '/genre/$genreId'
+      path: '/genre/$genreId'
+      fullPath: '/genre/$genreId'
+      preLoaderRoute: typeof GenreGenreIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/anime/$malId': {
       id: '/anime/$malId'
       path: '/anime/$malId'
@@ -220,6 +392,13 @@ declare module '@tanstack/react-router' {
       path: '/watchlist'
       fullPath: '/watchlist'
       preLoaderRoute: typeof AuthenticatedWatchlistRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/history': {
@@ -270,12 +449,14 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
+  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedWatchlistRoute: typeof AuthenticatedWatchlistRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
+  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedWatchlistRoute: AuthenticatedWatchlistRoute,
 }
 
@@ -286,9 +467,17 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  AboutRoute: AboutRoute,
   BrowseRoute: BrowseRoute,
+  DmcaRoute: DmcaRoute,
+  GenresRoute: GenresRoute,
   LoginRoute: LoginRoute,
+  PrivacyRoute: PrivacyRoute,
+  ScheduleRoute: ScheduleRoute,
+  SearchRoute: SearchRoute,
+  TermsRoute: TermsRoute,
   AnimeMalIdRoute: AnimeMalIdRoute,
+  GenreGenreIdRoute: GenreGenreIdRoute,
   ApiPublicHealthCheckRoute: ApiPublicHealthCheckRoute,
   ApiPublicScoutRoute: ApiPublicScoutRoute,
   DownloadMalIdEpisodeRoute: DownloadMalIdEpisodeRoute,
