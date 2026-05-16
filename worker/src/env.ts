@@ -8,6 +8,5 @@ export const env = {
   SUPABASE_SERVICE_ROLE_KEY: need("SUPABASE_SERVICE_ROLE_KEY"),
   STREAMTAPE_LOGIN: process.env.STREAMTAPE_LOGIN ?? "",
   STREAMTAPE_KEY: process.env.STREAMTAPE_KEY ?? "",
-  MP4UPLOAD_USER: process.env.MP4UPLOAD_USER ?? "",
-  MP4UPLOAD_PASS: process.env.MP4UPLOAD_PASS ?? "",
+  DOODSTREAM_API_KEY: process.env.DOODSTREAM_API_KEY ?? "",
 };
