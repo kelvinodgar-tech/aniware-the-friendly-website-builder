@@ -71,6 +71,54 @@ export type Database = {
         }
         Relationships: []
       }
+      ingestion_jobs: {
+        Row: {
+          attempts: number
+          created_at: string
+          episode_number: number
+          id: string
+          last_error: string | null
+          locked_at: string | null
+          magnet: string
+          mal_id: number
+          quality: string | null
+          release_group: string | null
+          release_title: string | null
+          status: Database["public"]["Enums"]["ingestion_status"]
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          episode_number: number
+          id?: string
+          last_error?: string | null
+          locked_at?: string | null
+          magnet: string
+          mal_id: number
+          quality?: string | null
+          release_group?: string | null
+          release_title?: string | null
+          status?: Database["public"]["Enums"]["ingestion_status"]
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          episode_number?: number
+          id?: string
+          last_error?: string | null
+          locked_at?: string | null
+          magnet?: string
+          mal_id?: number
+          quality?: string | null
+          release_group?: string | null
+          release_title?: string | null
+          status?: Database["public"]["Enums"]["ingestion_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       media_links: {
         Row: {
           created_at: string
@@ -242,6 +290,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      ingestion_status: "pending" | "processing" | "done" | "failed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -370,6 +419,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      ingestion_status: ["pending", "processing", "done", "failed"],
     },
   },
 } as const
