@@ -47,6 +47,12 @@ export function Header() {
           <Link to="/browse" className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors" activeProps={{ className: "text-foreground" }}>
             Browse
           </Link>
+          <Link to="/genres" className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors" activeProps={{ className: "text-foreground" }}>
+            Genres
+          </Link>
+          <Link to="/schedule" className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors" activeProps={{ className: "text-foreground" }}>
+            Schedule
+          </Link>
         </nav>
 
         <form
