@@ -7,10 +7,10 @@ import { ChevronLeft } from "lucide-react";
 
 export const Route = createFileRoute("/genre/$genreId")({
   validateSearch: (s: Record<string, unknown>) => ({ name: typeof s.name === "string" ? s.name : "" }),
-  head: ({ params, match }) => ({
+  head: () => ({
     meta: [
-      { title: `${(match.search as any).name || "Genre"} anime — Aniware` },
-      { name: "description", content: `Top anime in the ${(match.search as any).name || ""} genre.` },
+      { title: "Genre — Aniware" },
+      { name: "description", content: "Browse anime in this genre on Aniware." },
     ],
   }),
   component: GenrePage,
