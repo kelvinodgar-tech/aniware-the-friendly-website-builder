@@ -14,6 +14,7 @@ import { Route as GenresRouteImport } from './routes/genres'
 import { Route as BrowseRouteImport } from './routes/browse'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as GenreGenreIdRouteImport } from './routes/genre.$genreId'
 import { Route as AnimeMalIdRouteImport } from './routes/anime.$malId'
 import { Route as AuthenticatedWatchlistRouteImport } from './routes/_authenticated.watchlist'
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated.history'
@@ -45,6 +46,11 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GenreGenreIdRoute = GenreGenreIdRouteImport.update({
+  id: '/genre/$genreId',
+  path: '/genre/$genreId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AnimeMalIdRoute = AnimeMalIdRouteImport.update({
@@ -97,6 +103,7 @@ export interface FileRoutesByFullPath {
   '/history': typeof AuthenticatedHistoryRoute
   '/watchlist': typeof AuthenticatedWatchlistRoute
   '/anime/$malId': typeof AnimeMalIdRoute
+  '/genre/$genreId': typeof GenreGenreIdRoute
   '/api/public/health-check': typeof ApiPublicHealthCheckRoute
   '/api/public/scout': typeof ApiPublicScoutRoute
   '/download/$malId/$episode': typeof DownloadMalIdEpisodeRoute
@@ -111,6 +118,7 @@ export interface FileRoutesByTo {
   '/history': typeof AuthenticatedHistoryRoute
   '/watchlist': typeof AuthenticatedWatchlistRoute
   '/anime/$malId': typeof AnimeMalIdRoute
+  '/genre/$genreId': typeof GenreGenreIdRoute
   '/api/public/health-check': typeof ApiPublicHealthCheckRoute
   '/api/public/scout': typeof ApiPublicScoutRoute
   '/download/$malId/$episode': typeof DownloadMalIdEpisodeRoute
@@ -127,6 +135,7 @@ export interface FileRoutesById {
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
   '/_authenticated/watchlist': typeof AuthenticatedWatchlistRoute
   '/anime/$malId': typeof AnimeMalIdRoute
+  '/genre/$genreId': typeof GenreGenreIdRoute
   '/api/public/health-check': typeof ApiPublicHealthCheckRoute
   '/api/public/scout': typeof ApiPublicScoutRoute
   '/download/$malId/$episode': typeof DownloadMalIdEpisodeRoute
@@ -143,6 +152,7 @@ export interface FileRouteTypes {
     | '/history'
     | '/watchlist'
     | '/anime/$malId'
+    | '/genre/$genreId'
     | '/api/public/health-check'
     | '/api/public/scout'
     | '/download/$malId/$episode'
@@ -157,6 +167,7 @@ export interface FileRouteTypes {
     | '/history'
     | '/watchlist'
     | '/anime/$malId'
+    | '/genre/$genreId'
     | '/api/public/health-check'
     | '/api/public/scout'
     | '/download/$malId/$episode'
@@ -172,6 +183,7 @@ export interface FileRouteTypes {
     | '/_authenticated/history'
     | '/_authenticated/watchlist'
     | '/anime/$malId'
+    | '/genre/$genreId'
     | '/api/public/health-check'
     | '/api/public/scout'
     | '/download/$malId/$episode'
@@ -185,6 +197,7 @@ export interface RootRouteChildren {
   GenresRoute: typeof GenresRoute
   LoginRoute: typeof LoginRoute
   AnimeMalIdRoute: typeof AnimeMalIdRoute
+  GenreGenreIdRoute: typeof GenreGenreIdRoute
   ApiPublicHealthCheckRoute: typeof ApiPublicHealthCheckRoute
   ApiPublicScoutRoute: typeof ApiPublicScoutRoute
   DownloadMalIdEpisodeRoute: typeof DownloadMalIdEpisodeRoute
@@ -226,6 +239,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/genre/$genreId': {
+      id: '/genre/$genreId'
+      path: '/genre/$genreId'
+      fullPath: '/genre/$genreId'
+      preLoaderRoute: typeof GenreGenreIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/anime/$malId': {
@@ -310,6 +330,7 @@ const rootRouteChildren: RootRouteChildren = {
   GenresRoute: GenresRoute,
   LoginRoute: LoginRoute,
   AnimeMalIdRoute: AnimeMalIdRoute,
+  GenreGenreIdRoute: GenreGenreIdRoute,
   ApiPublicHealthCheckRoute: ApiPublicHealthCheckRoute,
   ApiPublicScoutRoute: ApiPublicScoutRoute,
   DownloadMalIdEpisodeRoute: DownloadMalIdEpisodeRoute,
