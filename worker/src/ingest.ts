@@ -113,12 +113,12 @@ async function main() {
     transcode(src, out);
 
     const st = await uploadStreamtape(out);
-    const mp = await uploadMp4Upload(out);
-    if (!st && !mp) throw new Error("no upload provider succeeded");
+    const dd = await uploadDoodStream(out);
+    if (!st && !dd) throw new Error("no upload provider succeeded");
 
     const rows = [
       st && { mal_id: job.mal_id, episode_number: job.episode_number, server_name: "streamtape", quality: job.quality, embed_url: st.url, direct_download_url: st.download, priority: 10 },
-      mp && { mal_id: job.mal_id, episode_number: job.episode_number, server_name: "mp4upload", quality: job.quality, embed_url: mp.url, priority: 20 },
+      dd && { mal_id: job.mal_id, episode_number: job.episode_number, server_name: "doodstream", quality: job.quality, embed_url: dd.url, priority: 20 },
     ].filter(Boolean) as any[];
     const { error } = await db.from("media_links").insert(rows);
     if (error) throw error;
