@@ -60,6 +60,13 @@ export const searchAnime = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ query: z.string().min(1).max(80) }).parse(d))
   .handler(async ({ data }) => {
     try {
+      const list = await jikanSearch(data.query);
+      return list.map(toAnimeRow);
+    } catch (e) {
+      console.error("searchAnime failed", e);
+      return [];
+    }
+  });
 
 export const listGenres = createServerFn({ method: "GET" }).handler(async () => {
   try {
@@ -91,13 +98,6 @@ export const getSchedule = createServerFn({ method: "POST" })
       return list.map(toAnimeRow);
     } catch (e) {
       console.error("getSchedule failed", e);
-      return [];
-    }
-  });
-      const list = await jikanSearch(data.query);
-      return list.map(toAnimeRow);
-    } catch (e) {
-      console.error("searchAnime failed", e);
       return [];
     }
   });
