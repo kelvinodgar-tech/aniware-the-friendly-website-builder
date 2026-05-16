@@ -15,6 +15,7 @@ import { Route as ScheduleRouteImport } from './routes/schedule'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as GenresRouteImport } from './routes/genres'
+import { Route as DmcaRouteImport } from './routes/dmca'
 import { Route as BrowseRouteImport } from './routes/browse'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
@@ -58,6 +59,11 @@ const LoginRoute = LoginRouteImport.update({
 const GenresRoute = GenresRouteImport.update({
   id: '/genres',
   path: '/genres',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DmcaRoute = DmcaRouteImport.update({
+  id: '/dmca',
+  path: '/dmca',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BrowseRoute = BrowseRouteImport.update({
@@ -134,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/browse': typeof BrowseRoute
+  '/dmca': typeof DmcaRoute
   '/genres': typeof GenresRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
@@ -155,6 +162,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/browse': typeof BrowseRoute
+  '/dmca': typeof DmcaRoute
   '/genres': typeof GenresRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
@@ -178,6 +186,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/about': typeof AboutRoute
   '/browse': typeof BrowseRoute
+  '/dmca': typeof DmcaRoute
   '/genres': typeof GenresRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
@@ -201,6 +210,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/browse'
+    | '/dmca'
     | '/genres'
     | '/login'
     | '/privacy'
@@ -222,6 +232,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/browse'
+    | '/dmca'
     | '/genres'
     | '/login'
     | '/privacy'
@@ -244,6 +255,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/about'
     | '/browse'
+    | '/dmca'
     | '/genres'
     | '/login'
     | '/privacy'
@@ -267,6 +279,7 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AboutRoute: typeof AboutRoute
   BrowseRoute: typeof BrowseRoute
+  DmcaRoute: typeof DmcaRoute
   GenresRoute: typeof GenresRoute
   LoginRoute: typeof LoginRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -323,6 +336,13 @@ declare module '@tanstack/react-router' {
       path: '/genres'
       fullPath: '/genres'
       preLoaderRoute: typeof GenresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dmca': {
+      id: '/dmca'
+      path: '/dmca'
+      fullPath: '/dmca'
+      preLoaderRoute: typeof DmcaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/browse': {
@@ -449,6 +469,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AboutRoute: AboutRoute,
   BrowseRoute: BrowseRoute,
+  DmcaRoute: DmcaRoute,
   GenresRoute: GenresRoute,
   LoginRoute: LoginRoute,
   PrivacyRoute: PrivacyRoute,
