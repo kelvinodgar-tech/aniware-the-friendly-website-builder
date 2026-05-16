@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as ScheduleRouteImport } from './routes/schedule'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as GenresRouteImport } from './routes/genres'
@@ -25,6 +26,11 @@ import { Route as DownloadMalIdEpisodeRouteImport } from './routes/download.$mal
 import { Route as ApiPublicScoutRouteImport } from './routes/api/public/scout'
 import { Route as ApiPublicHealthCheckRouteImport } from './routes/api/public/health-check'
 
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ScheduleRoute = ScheduleRouteImport.update({
   id: '/schedule',
   path: '/schedule',
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/genres': typeof GenresRoute
   '/login': typeof LoginRoute
   '/schedule': typeof ScheduleRoute
+  '/search': typeof SearchRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/watchlist': typeof AuthenticatedWatchlistRoute
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/genres': typeof GenresRoute
   '/login': typeof LoginRoute
   '/schedule': typeof ScheduleRoute
+  '/search': typeof SearchRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/watchlist': typeof AuthenticatedWatchlistRoute
@@ -140,6 +148,7 @@ export interface FileRoutesById {
   '/genres': typeof GenresRoute
   '/login': typeof LoginRoute
   '/schedule': typeof ScheduleRoute
+  '/search': typeof SearchRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
   '/_authenticated/watchlist': typeof AuthenticatedWatchlistRoute
@@ -158,6 +167,7 @@ export interface FileRouteTypes {
     | '/genres'
     | '/login'
     | '/schedule'
+    | '/search'
     | '/admin'
     | '/history'
     | '/watchlist'
@@ -174,6 +184,7 @@ export interface FileRouteTypes {
     | '/genres'
     | '/login'
     | '/schedule'
+    | '/search'
     | '/admin'
     | '/history'
     | '/watchlist'
@@ -191,6 +202,7 @@ export interface FileRouteTypes {
     | '/genres'
     | '/login'
     | '/schedule'
+    | '/search'
     | '/_authenticated/admin'
     | '/_authenticated/history'
     | '/_authenticated/watchlist'
@@ -209,6 +221,7 @@ export interface RootRouteChildren {
   GenresRoute: typeof GenresRoute
   LoginRoute: typeof LoginRoute
   ScheduleRoute: typeof ScheduleRoute
+  SearchRoute: typeof SearchRoute
   AnimeMalIdRoute: typeof AnimeMalIdRoute
   GenreGenreIdRoute: typeof GenreGenreIdRoute
   ApiPublicHealthCheckRoute: typeof ApiPublicHealthCheckRoute
@@ -219,6 +232,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/schedule': {
       id: '/schedule'
       path: '/schedule'
@@ -350,6 +370,7 @@ const rootRouteChildren: RootRouteChildren = {
   GenresRoute: GenresRoute,
   LoginRoute: LoginRoute,
   ScheduleRoute: ScheduleRoute,
+  SearchRoute: SearchRoute,
   AnimeMalIdRoute: AnimeMalIdRoute,
   GenreGenreIdRoute: GenreGenreIdRoute,
   ApiPublicHealthCheckRoute: ApiPublicHealthCheckRoute,
@@ -360,3 +381,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
