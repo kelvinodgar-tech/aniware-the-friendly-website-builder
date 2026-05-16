@@ -9,12 +9,30 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as BrowseRouteImport } from './routes/browse'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AnimeMalIdRouteImport } from './routes/anime.$malId'
+import { Route as AuthenticatedWatchlistRouteImport } from './routes/_authenticated.watchlist'
+import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated.history'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
+import { Route as WatchMalIdEpisodeRouteImport } from './routes/watch.$malId.$episode'
+import { Route as DownloadMalIdEpisodeRouteImport } from './routes/download.$malId.$episode'
+import { Route as ApiPublicHealthCheckRouteImport } from './routes/api/public/health-check'
 
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BrowseRoute = BrowseRouteImport.update({
   id: '/browse',
   path: '/browse',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -22,40 +40,152 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AnimeMalIdRoute = AnimeMalIdRouteImport.update({
+  id: '/anime/$malId',
+  path: '/anime/$malId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedWatchlistRoute = AuthenticatedWatchlistRouteImport.update({
+  id: '/watchlist',
+  path: '/watchlist',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedHistoryRoute = AuthenticatedHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const WatchMalIdEpisodeRoute = WatchMalIdEpisodeRouteImport.update({
+  id: '/watch/$malId/$episode',
+  path: '/watch/$malId/$episode',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DownloadMalIdEpisodeRoute = DownloadMalIdEpisodeRouteImport.update({
+  id: '/download/$malId/$episode',
+  path: '/download/$malId/$episode',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicHealthCheckRoute = ApiPublicHealthCheckRouteImport.update({
+  id: '/api/public/health-check',
+  path: '/api/public/health-check',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/browse': typeof BrowseRoute
+  '/login': typeof LoginRoute
+  '/admin': typeof AuthenticatedAdminRoute
+  '/history': typeof AuthenticatedHistoryRoute
+  '/watchlist': typeof AuthenticatedWatchlistRoute
+  '/anime/$malId': typeof AnimeMalIdRoute
+  '/api/public/health-check': typeof ApiPublicHealthCheckRoute
+  '/download/$malId/$episode': typeof DownloadMalIdEpisodeRoute
+  '/watch/$malId/$episode': typeof WatchMalIdEpisodeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/browse': typeof BrowseRoute
+  '/login': typeof LoginRoute
+  '/admin': typeof AuthenticatedAdminRoute
+  '/history': typeof AuthenticatedHistoryRoute
+  '/watchlist': typeof AuthenticatedWatchlistRoute
+  '/anime/$malId': typeof AnimeMalIdRoute
+  '/api/public/health-check': typeof ApiPublicHealthCheckRoute
+  '/download/$malId/$episode': typeof DownloadMalIdEpisodeRoute
+  '/watch/$malId/$episode': typeof WatchMalIdEpisodeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/browse': typeof BrowseRoute
+  '/login': typeof LoginRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/history': typeof AuthenticatedHistoryRoute
+  '/_authenticated/watchlist': typeof AuthenticatedWatchlistRoute
+  '/anime/$malId': typeof AnimeMalIdRoute
+  '/api/public/health-check': typeof ApiPublicHealthCheckRoute
+  '/download/$malId/$episode': typeof DownloadMalIdEpisodeRoute
+  '/watch/$malId/$episode': typeof WatchMalIdEpisodeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/browse'
+  fullPaths:
+    | '/'
+    | '/browse'
+    | '/login'
+    | '/admin'
+    | '/history'
+    | '/watchlist'
+    | '/anime/$malId'
+    | '/api/public/health-check'
+    | '/download/$malId/$episode'
+    | '/watch/$malId/$episode'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/browse'
-  id: '__root__' | '/' | '/browse'
+  to:
+    | '/'
+    | '/browse'
+    | '/login'
+    | '/admin'
+    | '/history'
+    | '/watchlist'
+    | '/anime/$malId'
+    | '/api/public/health-check'
+    | '/download/$malId/$episode'
+    | '/watch/$malId/$episode'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/browse'
+    | '/login'
+    | '/_authenticated/admin'
+    | '/_authenticated/history'
+    | '/_authenticated/watchlist'
+    | '/anime/$malId'
+    | '/api/public/health-check'
+    | '/download/$malId/$episode'
+    | '/watch/$malId/$episode'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   BrowseRoute: typeof BrowseRoute
+  LoginRoute: typeof LoginRoute
+  AnimeMalIdRoute: typeof AnimeMalIdRoute
+  ApiPublicHealthCheckRoute: typeof ApiPublicHealthCheckRoute
+  DownloadMalIdEpisodeRoute: typeof DownloadMalIdEpisodeRoute
+  WatchMalIdEpisodeRoute: typeof WatchMalIdEpisodeRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/browse': {
       id: '/browse'
       path: '/browse'
       fullPath: '/browse'
       preLoaderRoute: typeof BrowseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -65,12 +195,83 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/anime/$malId': {
+      id: '/anime/$malId'
+      path: '/anime/$malId'
+      fullPath: '/anime/$malId'
+      preLoaderRoute: typeof AnimeMalIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/watchlist': {
+      id: '/_authenticated/watchlist'
+      path: '/watchlist'
+      fullPath: '/watchlist'
+      preLoaderRoute: typeof AuthenticatedWatchlistRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/history': {
+      id: '/_authenticated/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof AuthenticatedHistoryRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/watch/$malId/$episode': {
+      id: '/watch/$malId/$episode'
+      path: '/watch/$malId/$episode'
+      fullPath: '/watch/$malId/$episode'
+      preLoaderRoute: typeof WatchMalIdEpisodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/download/$malId/$episode': {
+      id: '/download/$malId/$episode'
+      path: '/download/$malId/$episode'
+      fullPath: '/download/$malId/$episode'
+      preLoaderRoute: typeof DownloadMalIdEpisodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/health-check': {
+      id: '/api/public/health-check'
+      path: '/api/public/health-check'
+      fullPath: '/api/public/health-check'
+      preLoaderRoute: typeof ApiPublicHealthCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface AuthenticatedRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
+  AuthenticatedWatchlistRoute: typeof AuthenticatedWatchlistRoute
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
+  AuthenticatedWatchlistRoute: AuthenticatedWatchlistRoute,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
   BrowseRoute: BrowseRoute,
+  LoginRoute: LoginRoute,
+  AnimeMalIdRoute: AnimeMalIdRoute,
+  ApiPublicHealthCheckRoute: ApiPublicHealthCheckRoute,
+  DownloadMalIdEpisodeRoute: DownloadMalIdEpisodeRoute,
+  WatchMalIdEpisodeRoute: WatchMalIdEpisodeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
