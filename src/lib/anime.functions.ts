@@ -3,7 +3,10 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
+  jikanByGenre,
   jikanDetails,
+  jikanGenres,
+  jikanSchedule,
   jikanSearch,
   jikanSeasonNow,
   jikanTop,
