@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ScheduleRouteImport } from './routes/schedule'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as GenresRouteImport } from './routes/genres'
 import { Route as BrowseRouteImport } from './routes/browse'
@@ -24,6 +25,11 @@ import { Route as DownloadMalIdEpisodeRouteImport } from './routes/download.$mal
 import { Route as ApiPublicScoutRouteImport } from './routes/api/public/scout'
 import { Route as ApiPublicHealthCheckRouteImport } from './routes/api/public/health-check'
 
+const ScheduleRoute = ScheduleRouteImport.update({
+  id: '/schedule',
+  path: '/schedule',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -99,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/browse': typeof BrowseRoute
   '/genres': typeof GenresRoute
   '/login': typeof LoginRoute
+  '/schedule': typeof ScheduleRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/watchlist': typeof AuthenticatedWatchlistRoute
@@ -114,6 +121,7 @@ export interface FileRoutesByTo {
   '/browse': typeof BrowseRoute
   '/genres': typeof GenresRoute
   '/login': typeof LoginRoute
+  '/schedule': typeof ScheduleRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/watchlist': typeof AuthenticatedWatchlistRoute
@@ -131,6 +139,7 @@ export interface FileRoutesById {
   '/browse': typeof BrowseRoute
   '/genres': typeof GenresRoute
   '/login': typeof LoginRoute
+  '/schedule': typeof ScheduleRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
   '/_authenticated/watchlist': typeof AuthenticatedWatchlistRoute
@@ -148,6 +157,7 @@ export interface FileRouteTypes {
     | '/browse'
     | '/genres'
     | '/login'
+    | '/schedule'
     | '/admin'
     | '/history'
     | '/watchlist'
@@ -163,6 +173,7 @@ export interface FileRouteTypes {
     | '/browse'
     | '/genres'
     | '/login'
+    | '/schedule'
     | '/admin'
     | '/history'
     | '/watchlist'
@@ -179,6 +190,7 @@ export interface FileRouteTypes {
     | '/browse'
     | '/genres'
     | '/login'
+    | '/schedule'
     | '/_authenticated/admin'
     | '/_authenticated/history'
     | '/_authenticated/watchlist'
@@ -196,6 +208,7 @@ export interface RootRouteChildren {
   BrowseRoute: typeof BrowseRoute
   GenresRoute: typeof GenresRoute
   LoginRoute: typeof LoginRoute
+  ScheduleRoute: typeof ScheduleRoute
   AnimeMalIdRoute: typeof AnimeMalIdRoute
   GenreGenreIdRoute: typeof GenreGenreIdRoute
   ApiPublicHealthCheckRoute: typeof ApiPublicHealthCheckRoute
@@ -206,6 +219,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/schedule': {
+      id: '/schedule'
+      path: '/schedule'
+      fullPath: '/schedule'
+      preLoaderRoute: typeof ScheduleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -329,6 +349,7 @@ const rootRouteChildren: RootRouteChildren = {
   BrowseRoute: BrowseRoute,
   GenresRoute: GenresRoute,
   LoginRoute: LoginRoute,
+  ScheduleRoute: ScheduleRoute,
   AnimeMalIdRoute: AnimeMalIdRoute,
   GenreGenreIdRoute: GenreGenreIdRoute,
   ApiPublicHealthCheckRoute: ApiPublicHealthCheckRoute,
