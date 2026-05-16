@@ -60,6 +60,40 @@ export const searchAnime = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ query: z.string().min(1).max(80) }).parse(d))
   .handler(async ({ data }) => {
     try {
+
+export const listGenres = createServerFn({ method: "GET" }).handler(async () => {
+  try {
+    const list = await jikanGenres();
+    return list.sort((a, b) => b.count - a.count);
+  } catch (e) {
+    console.error("listGenres failed", e);
+    return [];
+  }
+});
+
+export const animeByGenre = createServerFn({ method: "POST" })
+  .inputValidator((d) => z.object({ genreId: z.number().int().positive(), page: z.number().int().min(1).max(20).default(1) }).parse(d))
+  .handler(async ({ data }) => {
+    try {
+      const list = await jikanByGenre(data.genreId, data.page);
+      return list.map(toAnimeRow);
+    } catch (e) {
+      console.error("animeByGenre failed", e);
+      return [];
+    }
+  });
+
+export const getSchedule = createServerFn({ method: "POST" })
+  .inputValidator((d) => z.object({ day: z.enum(["monday","tuesday","wednesday","thursday","friday","saturday","sunday"]) }).parse(d))
+  .handler(async ({ data }) => {
+    try {
+      const list = await jikanSchedule(data.day);
+      return list.map(toAnimeRow);
+    } catch (e) {
+      console.error("getSchedule failed", e);
+      return [];
+    }
+  });
       const list = await jikanSearch(data.query);
       return list.map(toAnimeRow);
     } catch (e) {
