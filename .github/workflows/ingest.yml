@@ -45,6 +45,5 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           STREAMTAPE_LOGIN: ${{ secrets.STREAMTAPE_LOGIN }}
           STREAMTAPE_KEY: ${{ secrets.STREAMTAPE_KEY }}
-          MP4UPLOAD_USER: ${{ secrets.MP4UPLOAD_USER }}
-          MP4UPLOAD_PASS: ${{ secrets.MP4UPLOAD_PASS }}
+          DOODSTREAM_API_KEY: ${{ secrets.DOODSTREAM_API_KEY }}
         run: npm run ingest
