@@ -84,3 +84,26 @@ export const isMyAdmin = createServerFn({ method: "GET" })
       .maybeSingle();
     return { isAdmin: !!data, userId };
   });
+
+export const getMyProfile = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
+    return data;
+  });
+
+export const updateMyProfile = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z.object({
+      username: z.string().min(2).max(40).regex(/^[a-zA-Z0-9_-]+$/).optional(),
+      avatar_url: z.string().url().max(500).nullable().optional(),
+    }).parse(d)
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { error } = await supabase.from("profiles").update(data).eq("id", userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
