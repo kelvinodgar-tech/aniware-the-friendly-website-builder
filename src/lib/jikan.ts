@@ -45,6 +45,21 @@ export async function jikanSearch(query: string, page = 1) {
   return d.data;
 }
 
+export async function jikanGenres() {
+  const d = await jget<{ data: Array<{ mal_id: number; name: string; count: number }> }>(`/genres/anime`);
+  return d.data;
+}
+
+export async function jikanByGenre(genreId: number, page = 1) {
+  const d = await jget<{ data: JikanAnime[] }>(`/anime?genres=${genreId}&order_by=score&sort=desc&page=${page}&limit=24&sfw=true`);
+  return d.data;
+}
+
+export async function jikanSchedule(day: string) {
+  const d = await jget<{ data: JikanAnime[] }>(`/schedules?filter=${day}&sfw=true&limit=25`);
+  return d.data;
+}
+
 export async function jikanDetails(malId: number) {
   const d = await jget<{ data: JikanAnime }>(`/anime/${malId}/full`);
   return d.data;
