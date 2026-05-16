@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ScheduleRouteImport } from './routes/schedule'
 import { Route as LoginRouteImport } from './routes/login'
@@ -28,6 +29,11 @@ import { Route as DownloadMalIdEpisodeRouteImport } from './routes/download.$mal
 import { Route as ApiPublicScoutRouteImport } from './routes/api/public/scout'
 import { Route as ApiPublicHealthCheckRouteImport } from './routes/api/public/health-check'
 
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
@@ -126,6 +132,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/schedule': typeof ScheduleRoute
   '/search': typeof SearchRoute
+  '/terms': typeof TermsRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/profile': typeof AuthenticatedProfileRoute
@@ -145,6 +152,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/schedule': typeof ScheduleRoute
   '/search': typeof SearchRoute
+  '/terms': typeof TermsRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/profile': typeof AuthenticatedProfileRoute
@@ -166,6 +174,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/schedule': typeof ScheduleRoute
   '/search': typeof SearchRoute
+  '/terms': typeof TermsRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
@@ -187,6 +196,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/schedule'
     | '/search'
+    | '/terms'
     | '/admin'
     | '/history'
     | '/profile'
@@ -206,6 +216,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/schedule'
     | '/search'
+    | '/terms'
     | '/admin'
     | '/history'
     | '/profile'
@@ -226,6 +237,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/schedule'
     | '/search'
+    | '/terms'
     | '/_authenticated/admin'
     | '/_authenticated/history'
     | '/_authenticated/profile'
@@ -247,6 +259,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   ScheduleRoute: typeof ScheduleRoute
   SearchRoute: typeof SearchRoute
+  TermsRoute: typeof TermsRoute
   AnimeMalIdRoute: typeof AnimeMalIdRoute
   GenreGenreIdRoute: typeof GenreGenreIdRoute
   ApiPublicHealthCheckRoute: typeof ApiPublicHealthCheckRoute
@@ -257,6 +270,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/search': {
       id: '/search'
       path: '/search'
@@ -413,6 +433,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   ScheduleRoute: ScheduleRoute,
   SearchRoute: SearchRoute,
+  TermsRoute: TermsRoute,
   AnimeMalIdRoute: AnimeMalIdRoute,
   GenreGenreIdRoute: GenreGenreIdRoute,
   ApiPublicHealthCheckRoute: ApiPublicHealthCheckRoute,
