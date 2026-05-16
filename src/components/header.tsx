@@ -90,6 +90,9 @@ export function Header() {
                 <DropdownMenuItem asChild>
                   <Link to="/history"><History className="w-4 h-4 mr-2" />Continue watching</Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/profile"><UserIcon className="w-4 h-4 mr-2" />Profile</Link>
+                </DropdownMenuItem>
                 {isAdmin && (
                   <DropdownMenuItem asChild>
                     <Link to="/admin"><Shield className="w-4 h-4 mr-2" />Admin</Link>
