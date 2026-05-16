@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ScheduleRouteImport } from './routes/schedule'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as GenresRouteImport } from './routes/genres'
 import { Route as BrowseRouteImport } from './routes/browse'
@@ -42,6 +43,11 @@ const SearchRoute = SearchRouteImport.update({
 const ScheduleRoute = ScheduleRouteImport.update({
   id: '/schedule',
   path: '/schedule',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -130,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/browse': typeof BrowseRoute
   '/genres': typeof GenresRoute
   '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
   '/schedule': typeof ScheduleRoute
   '/search': typeof SearchRoute
   '/terms': typeof TermsRoute
@@ -150,6 +157,7 @@ export interface FileRoutesByTo {
   '/browse': typeof BrowseRoute
   '/genres': typeof GenresRoute
   '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
   '/schedule': typeof ScheduleRoute
   '/search': typeof SearchRoute
   '/terms': typeof TermsRoute
@@ -172,6 +180,7 @@ export interface FileRoutesById {
   '/browse': typeof BrowseRoute
   '/genres': typeof GenresRoute
   '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
   '/schedule': typeof ScheduleRoute
   '/search': typeof SearchRoute
   '/terms': typeof TermsRoute
@@ -194,6 +203,7 @@ export interface FileRouteTypes {
     | '/browse'
     | '/genres'
     | '/login'
+    | '/privacy'
     | '/schedule'
     | '/search'
     | '/terms'
@@ -214,6 +224,7 @@ export interface FileRouteTypes {
     | '/browse'
     | '/genres'
     | '/login'
+    | '/privacy'
     | '/schedule'
     | '/search'
     | '/terms'
@@ -235,6 +246,7 @@ export interface FileRouteTypes {
     | '/browse'
     | '/genres'
     | '/login'
+    | '/privacy'
     | '/schedule'
     | '/search'
     | '/terms'
@@ -257,6 +269,7 @@ export interface RootRouteChildren {
   BrowseRoute: typeof BrowseRoute
   GenresRoute: typeof GenresRoute
   LoginRoute: typeof LoginRoute
+  PrivacyRoute: typeof PrivacyRoute
   ScheduleRoute: typeof ScheduleRoute
   SearchRoute: typeof SearchRoute
   TermsRoute: typeof TermsRoute
@@ -289,6 +302,13 @@ declare module '@tanstack/react-router' {
       path: '/schedule'
       fullPath: '/schedule'
       preLoaderRoute: typeof ScheduleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -431,6 +451,7 @@ const rootRouteChildren: RootRouteChildren = {
   BrowseRoute: BrowseRoute,
   GenresRoute: GenresRoute,
   LoginRoute: LoginRoute,
+  PrivacyRoute: PrivacyRoute,
   ScheduleRoute: ScheduleRoute,
   SearchRoute: SearchRoute,
   TermsRoute: TermsRoute,
