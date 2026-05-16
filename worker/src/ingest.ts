@@ -79,18 +79,21 @@ async function uploadStreamtape(file: string): Promise<{ url: string; download: 
   return { url: j.result.url, download: j.result.url };
 }
 
-async function uploadMp4Upload(file: string): Promise<{ url: string } | null> {
-  if (!env.MP4UPLOAD_USER || !env.MP4UPLOAD_PASS) return null;
-  // Mp4Upload remote upload via "add link" requires the file already on a URL;
-  // here we use the direct upload server. Get server then post.
-  // NOTE: best-effort; if API shape changes, this gracefully returns null.
+async function uploadDoodStream(file: string): Promise<{ url: string } | null> {
+  if (!env.DOODSTREAM_API_KEY) return null;
   try {
-    const srv = await fetch(`https://www.mp4upload.com/api/upload/server?key=${env.MP4UPLOAD_PASS}`).then((r) => r.text());
-    const out = execFileSync("curl", ["-sS", "-F", `file=@${file}`, "-F", `username=${env.MP4UPLOAD_USER}`, "-F", `key=${env.MP4UPLOAD_PASS}`, srv.trim()]).toString();
-    const m = out.match(/https?:\/\/www\.mp4upload\.com\/embed-[a-z0-9]+/i);
-    return m ? { url: m[0] } : null;
+    // 1) get a local upload server
+    const srvRes = await fetch(`https://doodapi.com/api/upload/server?key=${env.DOODSTREAM_API_KEY}`).then((r) => r.json() as Promise<{ result?: string }>);
+    const upUrl = srvRes?.result;
+    if (!upUrl) throw new Error("doodstream: no upload server");
+    // 2) multipart POST the file
+    const out = execFileSync("curl", ["-sS", "-F", `api_key=${env.DOODSTREAM_API_KEY}`, "-F", `file=@${file}`, upUrl]).toString();
+    const j = JSON.parse(out) as { result?: Array<{ download_url?: string; protected_embed?: string; filecode?: string }> };
+    const r = j.result?.[0];
+    const embed = r?.protected_embed ?? (r?.filecode ? `https://dood.to/e/${r.filecode}` : undefined);
+    return embed ? { url: embed } : null;
   } catch (e) {
-    console.warn("mp4upload failed", e);
+    console.warn("doodstream failed", e);
     return null;
   }
 }
