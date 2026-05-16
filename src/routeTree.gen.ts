@@ -19,6 +19,7 @@ import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
 import { Route as WatchMalIdEpisodeRouteImport } from './routes/watch.$malId.$episode'
 import { Route as DownloadMalIdEpisodeRouteImport } from './routes/download.$malId.$episode'
+import { Route as ApiPublicScoutRouteImport } from './routes/api/public/scout'
 import { Route as ApiPublicHealthCheckRouteImport } from './routes/api/public/health-check'
 
 const LoginRoute = LoginRouteImport.update({
@@ -70,6 +71,11 @@ const DownloadMalIdEpisodeRoute = DownloadMalIdEpisodeRouteImport.update({
   path: '/download/$malId/$episode',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicScoutRoute = ApiPublicScoutRouteImport.update({
+  id: '/api/public/scout',
+  path: '/api/public/scout',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHealthCheckRoute = ApiPublicHealthCheckRouteImport.update({
   id: '/api/public/health-check',
   path: '/api/public/health-check',
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/watchlist': typeof AuthenticatedWatchlistRoute
   '/anime/$malId': typeof AnimeMalIdRoute
   '/api/public/health-check': typeof ApiPublicHealthCheckRoute
+  '/api/public/scout': typeof ApiPublicScoutRoute
   '/download/$malId/$episode': typeof DownloadMalIdEpisodeRoute
   '/watch/$malId/$episode': typeof WatchMalIdEpisodeRoute
 }
@@ -97,6 +104,7 @@ export interface FileRoutesByTo {
   '/watchlist': typeof AuthenticatedWatchlistRoute
   '/anime/$malId': typeof AnimeMalIdRoute
   '/api/public/health-check': typeof ApiPublicHealthCheckRoute
+  '/api/public/scout': typeof ApiPublicScoutRoute
   '/download/$malId/$episode': typeof DownloadMalIdEpisodeRoute
   '/watch/$malId/$episode': typeof WatchMalIdEpisodeRoute
 }
@@ -111,6 +119,7 @@ export interface FileRoutesById {
   '/_authenticated/watchlist': typeof AuthenticatedWatchlistRoute
   '/anime/$malId': typeof AnimeMalIdRoute
   '/api/public/health-check': typeof ApiPublicHealthCheckRoute
+  '/api/public/scout': typeof ApiPublicScoutRoute
   '/download/$malId/$episode': typeof DownloadMalIdEpisodeRoute
   '/watch/$malId/$episode': typeof WatchMalIdEpisodeRoute
 }
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/watchlist'
     | '/anime/$malId'
     | '/api/public/health-check'
+    | '/api/public/scout'
     | '/download/$malId/$episode'
     | '/watch/$malId/$episode'
   fileRoutesByTo: FileRoutesByTo
@@ -137,6 +147,7 @@ export interface FileRouteTypes {
     | '/watchlist'
     | '/anime/$malId'
     | '/api/public/health-check'
+    | '/api/public/scout'
     | '/download/$malId/$episode'
     | '/watch/$malId/$episode'
   id:
@@ -150,6 +161,7 @@ export interface FileRouteTypes {
     | '/_authenticated/watchlist'
     | '/anime/$malId'
     | '/api/public/health-check'
+    | '/api/public/scout'
     | '/download/$malId/$episode'
     | '/watch/$malId/$episode'
   fileRoutesById: FileRoutesById
@@ -161,6 +173,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   AnimeMalIdRoute: typeof AnimeMalIdRoute
   ApiPublicHealthCheckRoute: typeof ApiPublicHealthCheckRoute
+  ApiPublicScoutRoute: typeof ApiPublicScoutRoute
   DownloadMalIdEpisodeRoute: typeof DownloadMalIdEpisodeRoute
   WatchMalIdEpisodeRoute: typeof WatchMalIdEpisodeRoute
 }
@@ -237,6 +250,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DownloadMalIdEpisodeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/scout': {
+      id: '/api/public/scout'
+      path: '/api/public/scout'
+      fullPath: '/api/public/scout'
+      preLoaderRoute: typeof ApiPublicScoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/health-check': {
       id: '/api/public/health-check'
       path: '/api/public/health-check'
@@ -270,19 +290,10 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   AnimeMalIdRoute: AnimeMalIdRoute,
   ApiPublicHealthCheckRoute: ApiPublicHealthCheckRoute,
+  ApiPublicScoutRoute: ApiPublicScoutRoute,
   DownloadMalIdEpisodeRoute: DownloadMalIdEpisodeRoute,
   WatchMalIdEpisodeRoute: WatchMalIdEpisodeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

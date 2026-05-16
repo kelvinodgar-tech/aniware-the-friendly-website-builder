@@ -1,0 +1,50 @@
+name: Aniware Ingest
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"   # every 30 minutes
+  workflow_dispatch:
+
+concurrency:
+  group: aniware-ingest
+  cancel-in-progress: false
+
+jobs:
+  scout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - run: npm i --no-audit --no-fund
+        working-directory: worker
+      - name: Scout new releases
+        working-directory: worker
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: npm run scout
+
+  ingest:
+    needs: scout
+    runs-on: ubuntu-latest
+    timeout-minutes: 330   # < 6h GitHub hard cap
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - name: Install system deps
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg aria2 curl
+      - run: npm i --no-audit --no-fund
+        working-directory: worker
+      - name: Process one job
+        working-directory: worker
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          STREAMTAPE_LOGIN: ${{ secrets.STREAMTAPE_LOGIN }}
+          STREAMTAPE_KEY: ${{ secrets.STREAMTAPE_KEY }}
+          MP4UPLOAD_USER: ${{ secrets.MP4UPLOAD_USER }}
+          MP4UPLOAD_PASS: ${{ secrets.MP4UPLOAD_PASS }}
+        run: npm run ingest
