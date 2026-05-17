@@ -12,6 +12,7 @@ concurrency:
 jobs:
   scout:
     runs-on: ubuntu-latest
+    environment: Aniware
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -29,6 +30,7 @@ jobs:
   ingest:
     needs: scout
     runs-on: ubuntu-latest
+    environment: Aniware
     timeout-minutes: 330   # < 6h GitHub hard cap
     steps:
       - uses: actions/checkout@v4
