@@ -1,29 +1,11 @@
-// Ingest one pending job: claim → aria2c → ffmpeg → upload to Streamtape (+Mp4Upload) → register media_links → cleanup.
+// Ingest one pending job: claim via API → aria2c → ffmpeg → upload to Streamtape (+DoodStream)
+// → register media_links via API → cleanup.
 import { execFileSync, spawnSync } from "node:child_process";
 import { mkdtempSync, readdirSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { db } from "./db.js";
+import { api } from "./api.js";
 import { env } from "./env.js";
-
-async function claim() {
-  const { data } = await db
-    .from("ingestion_jobs")
-    .select("*")
-    .eq("status", "pending")
-    .order("created_at", { ascending: true })
-    .limit(1)
-    .maybeSingle();
-  if (!data) return null;
-  const { data: locked } = await db
-    .from("ingestion_jobs")
-    .update({ status: "processing", locked_at: new Date().toISOString(), attempts: data.attempts + 1 })
-    .eq("id", data.id)
-    .eq("status", "pending")
-    .select()
-    .maybeSingle();
-  return locked;
-}
 
 function sh(cmd: string, args: string[], cwd?: string) {
   const r = spawnSync(cmd, args, { cwd, stdio: "inherit" });
@@ -72,7 +54,6 @@ async function uploadStreamtape(file: string): Promise<{ url: string; download: 
   ).then((r) => r.json() as Promise<{ result: { url: string } }>);
   const upUrl = init?.result?.url;
   if (!upUrl) throw new Error("streamtape: no upload url");
-  // Use curl for multipart streaming upload (avoids loading file in memory)
   const out = execFileSync("curl", ["-sS", "-F", `file1=@${file}`, upUrl]).toString();
   const j = JSON.parse(out) as { result?: { url: string; id: string } };
   if (!j.result?.url) throw new Error(`streamtape upload failed: ${out}`);
@@ -82,11 +63,10 @@ async function uploadStreamtape(file: string): Promise<{ url: string; download: 
 async function uploadDoodStream(file: string): Promise<{ url: string } | null> {
   if (!env.DOODSTREAM_API_KEY) return null;
   try {
-    // 1) get a local upload server
-    const srvRes = await fetch(`https://doodapi.com/api/upload/server?key=${env.DOODSTREAM_API_KEY}`).then((r) => r.json() as Promise<{ result?: string }>);
+    const srvRes = await fetch(`https://doodapi.com/api/upload/server?key=${env.DOODSTREAM_API_KEY}`)
+      .then((r) => r.json() as Promise<{ result?: string }>);
     const upUrl = srvRes?.result;
     if (!upUrl) throw new Error("doodstream: no upload server");
-    // 2) multipart POST the file
     const out = execFileSync("curl", ["-sS", "-F", `api_key=${env.DOODSTREAM_API_KEY}`, "-F", `file=@${file}`, upUrl]).toString();
     const j = JSON.parse(out) as { result?: Array<{ download_url?: string; protected_embed?: string; filecode?: string }> };
     const r = j.result?.[0];
@@ -99,7 +79,7 @@ async function uploadDoodStream(file: string): Promise<{ url: string } | null> {
 }
 
 async function main() {
-  const job = await claim();
+  const job = await api.claim();
   if (!job) {
     console.log("[ingest] no pending jobs");
     return;
@@ -116,21 +96,16 @@ async function main() {
     const dd = await uploadDoodStream(out);
     if (!st && !dd) throw new Error("no upload provider succeeded");
 
-    const rows = [
+    const links = [
       st && { mal_id: job.mal_id, episode_number: job.episode_number, server_name: "streamtape", quality: job.quality, embed_url: st.url, direct_download_url: st.download, priority: 10 },
       dd && { mal_id: job.mal_id, episode_number: job.episode_number, server_name: "doodstream", quality: job.quality, embed_url: dd.url, priority: 20 },
-    ].filter(Boolean) as any[];
-    const { error } = await db.from("media_links").insert(rows);
-    if (error) throw error;
+    ].filter(Boolean) as Array<Record<string, unknown>>;
 
-    await db.from("ingestion_jobs").update({ status: "done" }).eq("id", job.id);
-    console.log(`[ingest] done ${rows.length} mirror(s)`);
+    await api.complete(job.id, links);
+    console.log(`[ingest] done ${links.length} mirror(s)`);
   } catch (e: any) {
     console.error("[ingest] failed", e);
-    await db.from("ingestion_jobs").update({
-      status: job.attempts >= 3 ? "failed" : "pending",
-      last_error: String(e?.message ?? e).slice(0, 500),
-    }).eq("id", job.id);
+    try { await api.fail(job.id, String(e?.message ?? e).slice(0, 500), job.attempts); } catch {}
     process.exitCode = 1;
   } finally {
     try { rmSync(dir, { recursive: true, force: true }); } catch {}
