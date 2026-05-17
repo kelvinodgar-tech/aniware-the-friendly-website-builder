@@ -30,6 +30,7 @@ import { Route as WatchMalIdEpisodeRouteImport } from './routes/watch.$malId.$ep
 import { Route as DownloadMalIdEpisodeRouteImport } from './routes/download.$malId.$episode'
 import { Route as ApiPublicScoutRouteImport } from './routes/api/public/scout'
 import { Route as ApiPublicHealthCheckRouteImport } from './routes/api/public/health-check'
+import { Route as ApiPublicWorkerRpcRouteImport } from './routes/api/public/worker.rpc'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -135,6 +136,11 @@ const ApiPublicHealthCheckRoute = ApiPublicHealthCheckRouteImport.update({
   path: '/api/public/health-check',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicWorkerRpcRoute = ApiPublicWorkerRpcRouteImport.update({
+  id: '/api/public/worker/rpc',
+  path: '/api/public/worker/rpc',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -157,6 +163,7 @@ export interface FileRoutesByFullPath {
   '/api/public/scout': typeof ApiPublicScoutRoute
   '/download/$malId/$episode': typeof DownloadMalIdEpisodeRoute
   '/watch/$malId/$episode': typeof WatchMalIdEpisodeRoute
+  '/api/public/worker/rpc': typeof ApiPublicWorkerRpcRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -179,6 +186,7 @@ export interface FileRoutesByTo {
   '/api/public/scout': typeof ApiPublicScoutRoute
   '/download/$malId/$episode': typeof DownloadMalIdEpisodeRoute
   '/watch/$malId/$episode': typeof WatchMalIdEpisodeRoute
+  '/api/public/worker/rpc': typeof ApiPublicWorkerRpcRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -203,6 +211,7 @@ export interface FileRoutesById {
   '/api/public/scout': typeof ApiPublicScoutRoute
   '/download/$malId/$episode': typeof DownloadMalIdEpisodeRoute
   '/watch/$malId/$episode': typeof WatchMalIdEpisodeRoute
+  '/api/public/worker/rpc': typeof ApiPublicWorkerRpcRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -227,6 +236,7 @@ export interface FileRouteTypes {
     | '/api/public/scout'
     | '/download/$malId/$episode'
     | '/watch/$malId/$episode'
+    | '/api/public/worker/rpc'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -249,6 +259,7 @@ export interface FileRouteTypes {
     | '/api/public/scout'
     | '/download/$malId/$episode'
     | '/watch/$malId/$episode'
+    | '/api/public/worker/rpc'
   id:
     | '__root__'
     | '/'
@@ -272,6 +283,7 @@ export interface FileRouteTypes {
     | '/api/public/scout'
     | '/download/$malId/$episode'
     | '/watch/$malId/$episode'
+    | '/api/public/worker/rpc'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -292,6 +304,7 @@ export interface RootRouteChildren {
   ApiPublicScoutRoute: typeof ApiPublicScoutRoute
   DownloadMalIdEpisodeRoute: typeof DownloadMalIdEpisodeRoute
   WatchMalIdEpisodeRoute: typeof WatchMalIdEpisodeRoute
+  ApiPublicWorkerRpcRoute: typeof ApiPublicWorkerRpcRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -443,6 +456,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHealthCheckRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/worker/rpc': {
+      id: '/api/public/worker/rpc'
+      path: '/api/public/worker/rpc'
+      fullPath: '/api/public/worker/rpc'
+      preLoaderRoute: typeof ApiPublicWorkerRpcRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -482,17 +502,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicScoutRoute: ApiPublicScoutRoute,
   DownloadMalIdEpisodeRoute: DownloadMalIdEpisodeRoute,
   WatchMalIdEpisodeRoute: WatchMalIdEpisodeRoute,
+  ApiPublicWorkerRpcRoute: ApiPublicWorkerRpcRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
