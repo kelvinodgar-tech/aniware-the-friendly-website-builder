@@ -106,18 +106,11 @@ export const getAnimeDetails = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ malId: z.number().int().positive() }).parse(d))
   .handler(async ({ data }) => {
     const anime = await cacheAnime(data.malId);
-    const { data: links } = await supabaseAdmin
-      .from("media_links")
-      .select("episode_number, server_name, quality, is_active, status")
-      .eq("mal_id", data.malId)
-      .eq("is_active", true);
-    const availableEpisodes = new Set<number>(
-      (links ?? []).map((l) => l.episode_number)
-    );
-    return {
-      anime,
-      availableEpisodes: Array.from(availableEpisodes).sort((a, b) => a - b),
-    };
+    // Episodes are auto-provisioned on demand by getEpisodeSources, so just
+    // list 1..N from the metadata. Fall back to 12 if Jikan doesn't know.
+    const total = anime.episodes && anime.episodes > 0 ? anime.episodes : 12;
+    const availableEpisodes = Array.from({ length: total }, (_, i) => i + 1);
+    return { anime, availableEpisodes };
   });
 
 // Free iframe providers that accept MAL id + episode number directly.
