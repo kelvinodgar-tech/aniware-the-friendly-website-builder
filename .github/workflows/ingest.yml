@@ -1,51 +1,11 @@
-name: Aniware Ingest
-
+# Disabled — Aniware now provisions iframe sources on-demand from free
+# public CDNs (vidsrc, 2embed, miruro). No torrent/transcode/upload pipeline
+# is needed. Kept as a no-op so the file stays in repo history.
+name: Aniware Ingest (disabled)
 on:
-  schedule:
-    - cron: "*/30 * * * *"   # every 30 minutes
   workflow_dispatch:
-
-concurrency:
-  group: aniware-ingest
-  cancel-in-progress: false
-
 jobs:
-  scout:
+  noop:
     runs-on: ubuntu-latest
-    environment: Aniware
-    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: "20" }
-      - run: npm i --no-audit --no-fund
-        working-directory: worker
-      - name: Scout new releases
-        working-directory: worker
-        env:
-          APP_URL: ${{ secrets.APP_URL }}
-          WORKER_SECRET: ${{ secrets.WORKER_SECRET }}
-        run: npm run scout
-
-  ingest:
-    needs: scout
-    runs-on: ubuntu-latest
-    environment: Aniware
-    timeout-minutes: 330   # < 6h GitHub hard cap
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: "20" }
-      - name: Install system deps
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg aria2 curl
-      - run: npm i --no-audit --no-fund
-        working-directory: worker
-      - name: Process one job
-        working-directory: worker
-        env:
-          APP_URL: ${{ secrets.APP_URL }}
-          WORKER_SECRET: ${{ secrets.WORKER_SECRET }}
-          STREAMTAPE_LOGIN: ${{ secrets.STREAMTAPE_LOGIN }}
-          STREAMTAPE_KEY: ${{ secrets.STREAMTAPE_KEY }}
-          DOODSTREAM_API_KEY: ${{ secrets.DOODSTREAM_API_KEY }}
-        run: npm run ingest
+      - run: echo "Ingest pipeline disabled. Sources are auto-provisioned in-app."
