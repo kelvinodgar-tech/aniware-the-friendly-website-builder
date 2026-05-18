@@ -165,7 +165,7 @@ function DirectVideoPlayer({ source }: { source: EpisodeSource }) {
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-    let hls: { destroy: () => void } | null = null;
+    let hls: import("hls.js").default | null = null;
     let cancelled = false;
     setError(false);
 
@@ -180,7 +180,7 @@ function DirectVideoPlayer({ source }: { source: EpisodeSource }) {
           hls = new Hls({ enableWorker: true });
           hls.loadSource(source.embed_url);
           hls.attachMedia(video);
-          hls.on(Hls.Events.ERROR, (_event, data) => {
+          hls.on(Hls.Events.ERROR, (_event: string, data: { fatal: boolean }) => {
             if (data.fatal) setError(true);
           });
         })
