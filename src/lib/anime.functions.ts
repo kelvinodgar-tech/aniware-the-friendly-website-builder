@@ -120,6 +120,23 @@ export const getAnimeDetails = createServerFn({ method: "POST" })
     };
   });
 
+// Free iframe providers that accept MAL id + episode number directly.
+// No torrenting, no API keys. Player just embeds the iframe.
+function buildAutoSources(malId: number, episode: number) {
+  return [
+    { server_name: "vidsrc", quality: "720p", language: "sub", priority: 10,
+      embed_url: `https://vidsrc.cc/v2/embed/anime/ani${malId}/${episode}/sub` },
+    { server_name: "vidsrc", quality: "720p", language: "dub", priority: 15,
+      embed_url: `https://vidsrc.cc/v2/embed/anime/ani${malId}/${episode}/dub` },
+    { server_name: "2embed", quality: "720p", language: "sub", priority: 20,
+      embed_url: `https://2embed.cc/embed/anime/${malId}/${episode}/sub` },
+    { server_name: "2embed", quality: "720p", language: "dub", priority: 25,
+      embed_url: `https://2embed.cc/embed/anime/${malId}/${episode}/dub` },
+    { server_name: "miruro", quality: "720p", language: "sub", priority: 30,
+      embed_url: `https://www.miruro.tv/watch?id=${malId}&ep=${episode}` },
+  ];
+}
+
 export const getEpisodeSources = createServerFn({ method: "POST" })
   .inputValidator((d) =>
     z
@@ -128,13 +145,29 @@ export const getEpisodeSources = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const anime = await cacheAnime(data.malId);
-    const { data: links } = await supabaseAdmin
+
+    let { data: links } = await supabaseAdmin
       .from("media_links")
       .select("*")
       .eq("mal_id", data.malId)
       .eq("episode_number", data.episode)
       .eq("is_active", true)
       .order("priority", { ascending: true });
+
+    // Auto-provision iframe sources on first request — free, on-demand.
+    if (!links || links.length === 0) {
+      const rows = buildAutoSources(data.malId, data.episode).map((r) => ({
+        ...r,
+        mal_id: data.malId,
+        episode_number: data.episode,
+      }));
+      const { data: inserted } = await supabaseAdmin
+        .from("media_links")
+        .insert(rows)
+        .select();
+      links = inserted ?? rows as any;
+    }
+
     return { anime, sources: links ?? [] };
   });
 
