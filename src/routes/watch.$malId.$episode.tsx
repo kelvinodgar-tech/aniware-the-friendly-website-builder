@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Download, RefreshCw, AlertTriangle } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { getEpisodeSources } from "@/lib/anime.functions";
 import { PROVIDER_LABEL } from "@/lib/providers";
+
+type EpisodeSource = {
+  id: string;
+  embed_url: string;
+  server_name: string;
+  quality: string;
+  language: string | null;
+  subtitle_url: string | null;
+};
+
+function isDirectPlayable(source: EpisodeSource) {
+  return source.server_name === "direct" || /\.(m3u8|mp4|webm|ogg)(\?|$)/i.test(source.embed_url);
+}
 
 export const Route = createFileRoute("/watch/$malId/$episode")({
   head: ({ params }) => ({
@@ -39,7 +52,7 @@ function WatchPage() {
   const qualities = Array.from(new Set(sources.map((s) => s.quality)));
   const [quality, setQuality] = useState<string>("");
   const [provider, setProvider] = useState<string>("");
-  const [iframeKey, setIframeKey] = useState(0);
+  const [playerKey, setPlayerKey] = useState(0);
 
   useEffect(() => {
     if (qualities.length && !quality) setQuality(qualities.includes("720p") ? "720p" : qualities[0]);
@@ -70,13 +83,17 @@ function WatchPage() {
           {q.isLoading ? (
             <Skeleton className="w-full h-full" />
           ) : current ? (
-            <iframe
-              key={iframeKey + current.id}
-              src={current.embed_url}
-              allowFullScreen
-              allow="autoplay; fullscreen; picture-in-picture"
-              className="w-full h-full"
-            />
+            isDirectPlayable(current) ? (
+              <DirectVideoPlayer key={`${playerKey}-${current.id}`} source={current} />
+            ) : (
+              <iframe
+                key={`${playerKey}-${current.id}`}
+                src={current.embed_url}
+                allowFullScreen
+                allow="autoplay; fullscreen; picture-in-picture"
+                className="w-full h-full"
+              />
+            )
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center text-center px-6">
               <AlertTriangle className="w-10 h-10 text-warning mb-3" />
@@ -114,7 +131,7 @@ function WatchPage() {
             </SelectContent>
           </Select>
         )}
-        <Button variant="ghost" size="sm" onClick={() => setIframeKey((k) => k + 1)}>
+        <Button variant="ghost" size="sm" onClick={() => setPlayerKey((k) => k + 1)}>
           <RefreshCw className="w-4 h-4 mr-1" /> Reload
         </Button>
         <div className="ml-auto">
@@ -137,6 +154,68 @@ function WatchPage() {
         </div>
         {anime?.synopsis && <p className="mt-4 text-muted-foreground max-w-3xl line-clamp-4">{anime.synopsis}</p>}
       </div>
+    </div>
+  );
+}
+
+function DirectVideoPlayer({ source }: { source: EpisodeSource }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    let hls: import("hls.js").default | null = null;
+    let cancelled = false;
+    setError(false);
+
+    if (/\.m3u8(\?|$)/i.test(source.embed_url) && !video.canPlayType("application/vnd.apple.mpegurl")) {
+      import("hls.js")
+        .then(({ default: Hls }) => {
+          if (cancelled) return;
+          if (!Hls.isSupported()) {
+            setError(true);
+            return;
+          }
+          hls = new Hls({ enableWorker: true });
+          hls.loadSource(source.embed_url);
+          hls.attachMedia(video);
+          hls.on(Hls.Events.ERROR, (_event: string, data: { fatal: boolean }) => {
+            if (data.fatal) setError(true);
+          });
+        })
+        .catch(() => setError(true));
+    } else {
+      video.src = source.embed_url;
+    }
+
+    return () => {
+      cancelled = true;
+      hls?.destroy();
+      video.removeAttribute("src");
+      video.load();
+    };
+  }, [source.id, source.embed_url]);
+
+  return (
+    <div className="relative w-full h-full bg-black">
+      <video
+        ref={videoRef}
+        controls
+        playsInline
+        preload="metadata"
+        className="w-full h-full"
+        onError={() => setError(true)}
+      >
+        {source.subtitle_url && <track kind="subtitles" src={source.subtitle_url} label="Subtitles" default />}
+      </video>
+      {error && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 bg-background/95">
+          <AlertTriangle className="w-10 h-10 text-warning mb-3" />
+          <p className="font-semibold">This stream could not be played.</p>
+          <p className="text-sm text-muted-foreground mt-1">Try another server or reload the player.</p>
+        </div>
+      )}
     </div>
   );
 }

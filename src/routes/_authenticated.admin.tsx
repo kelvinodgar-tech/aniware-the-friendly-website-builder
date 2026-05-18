@@ -45,7 +45,7 @@ function AdminPage() {
   });
 
   const [form, setForm] = useState({
-    mal_id: "", episode_number: "1", server_name: "streamtape",
+    mal_id: "", episode_number: "1", server_name: "direct",
     quality: "720p" as "480p" | "720p" | "1080p",
     embed_url: "", direct_download_url: "", subtitle_url: "",
     language: "sub" as "sub" | "dub", priority: "100",
@@ -133,6 +133,7 @@ function AdminPage() {
             <Select value={form.server_name} onValueChange={(v) => setForm({ ...form, server_name: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
+                <SelectItem value="direct">Direct / HLS</SelectItem>
                 <SelectItem value="streamtape">Streamtape</SelectItem>
                 <SelectItem value="mp4upload">Mp4Upload</SelectItem>
                 <SelectItem value="generic">Generic</SelectItem>
@@ -147,7 +148,7 @@ function AdminPage() {
             </Select>
           </div>
           <div><Label>Priority (lower=higher)</Label><Input type="number" value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value })} /></div>
-          <div className="md:col-span-3"><Label>Embed URL</Label><Input value={form.embed_url} onChange={(e) => setForm({ ...form, embed_url: e.target.value })} placeholder="https://streamtape.com/e/..." /></div>
+          <div className="md:col-span-3"><Label>Stream or embed URL</Label><Input value={form.embed_url} onChange={(e) => setForm({ ...form, embed_url: e.target.value })} placeholder="https://example.com/video.m3u8" /></div>
           <div className="md:col-span-3"><Label>Direct download URL (optional)</Label><Input value={form.direct_download_url} onChange={(e) => setForm({ ...form, direct_download_url: e.target.value })} /></div>
           <div className="md:col-span-3"><Label>Subtitle .vtt URL (optional)</Label><Input value={form.subtitle_url} onChange={(e) => setForm({ ...form, subtitle_url: e.target.value })} /></div>
         </div>
