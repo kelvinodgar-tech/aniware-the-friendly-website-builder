@@ -1,0 +1,1 @@
+DELETE FROM public.media_links WHERE mal_id = 52991 AND episode_number IN (1, 2);
