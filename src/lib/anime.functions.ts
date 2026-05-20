@@ -13,6 +13,8 @@ import {
   toAnimeRow,
 } from "@/lib/jikan";
 import { detectFailureFromHtml, detectProvider } from "@/lib/providers";
+import { anikotoRecentPage, anikotoSeries } from "@/lib/anikoto";
+
 
 // 24h cache
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
