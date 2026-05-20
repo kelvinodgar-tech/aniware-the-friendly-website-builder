@@ -20,12 +20,26 @@ export type AnikotoSeries = {
   }>;
 };
 
-async function jget<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, {
-    headers: { Accept: "application/json", "user-agent": "AniwareBot/1.0" },
-  });
-  if (!res.ok) throw new Error(`Anikoto ${path} → ${res.status}`);
-  return res.json() as Promise<T>;
+async function sleep(ms: number) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+async function jget<T>(path: string, retries = 3): Promise<T> {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const res = await fetch(`${BASE}${path}`, {
+      headers: { Accept: "application/json", "user-agent": "AniwareBot/1.0" },
+    });
+    if (res.status === 429 || res.status === 503) {
+      const retryAfter = Number(res.headers.get("retry-after")) || 0;
+      const waitMs = Math.max(retryAfter * 1000, 2000 * Math.pow(2, attempt));
+      if (attempt === retries) throw new Error(`Anikoto ${path} rate-limited after ${retries} retries`);
+      await sleep(waitMs);
+      continue;
+    }
+    if (!res.ok) throw new Error(`Anikoto ${path} → ${res.status}`);
+    return res.json() as Promise<T>;
+  }
+  throw new Error(`Anikoto ${path} unreachable`);
 }
 
 export async function anikotoSeries(id: string | number) {
