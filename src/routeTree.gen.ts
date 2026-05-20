@@ -28,6 +28,7 @@ import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
 import { Route as WatchMalIdEpisodeRouteImport } from './routes/watch.$malId.$episode'
 import { Route as DownloadMalIdEpisodeRouteImport } from './routes/download.$malId.$episode'
+import { Route as ApiPublicSyncAnikotoRouteImport } from './routes/api/public/sync-anikoto'
 import { Route as ApiPublicScoutRouteImport } from './routes/api/public/scout'
 import { Route as ApiPublicHealthCheckRouteImport } from './routes/api/public/health-check'
 import { Route as ApiPublicWorkerRpcRouteImport } from './routes/api/public/worker.rpc'
@@ -126,6 +127,11 @@ const DownloadMalIdEpisodeRoute = DownloadMalIdEpisodeRouteImport.update({
   path: '/download/$malId/$episode',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicSyncAnikotoRoute = ApiPublicSyncAnikotoRouteImport.update({
+  id: '/api/public/sync-anikoto',
+  path: '/api/public/sync-anikoto',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicScoutRoute = ApiPublicScoutRouteImport.update({
   id: '/api/public/scout',
   path: '/api/public/scout',
@@ -161,6 +167,7 @@ export interface FileRoutesByFullPath {
   '/genre/$genreId': typeof GenreGenreIdRoute
   '/api/public/health-check': typeof ApiPublicHealthCheckRoute
   '/api/public/scout': typeof ApiPublicScoutRoute
+  '/api/public/sync-anikoto': typeof ApiPublicSyncAnikotoRoute
   '/download/$malId/$episode': typeof DownloadMalIdEpisodeRoute
   '/watch/$malId/$episode': typeof WatchMalIdEpisodeRoute
   '/api/public/worker/rpc': typeof ApiPublicWorkerRpcRoute
@@ -184,6 +191,7 @@ export interface FileRoutesByTo {
   '/genre/$genreId': typeof GenreGenreIdRoute
   '/api/public/health-check': typeof ApiPublicHealthCheckRoute
   '/api/public/scout': typeof ApiPublicScoutRoute
+  '/api/public/sync-anikoto': typeof ApiPublicSyncAnikotoRoute
   '/download/$malId/$episode': typeof DownloadMalIdEpisodeRoute
   '/watch/$malId/$episode': typeof WatchMalIdEpisodeRoute
   '/api/public/worker/rpc': typeof ApiPublicWorkerRpcRoute
@@ -209,6 +217,7 @@ export interface FileRoutesById {
   '/genre/$genreId': typeof GenreGenreIdRoute
   '/api/public/health-check': typeof ApiPublicHealthCheckRoute
   '/api/public/scout': typeof ApiPublicScoutRoute
+  '/api/public/sync-anikoto': typeof ApiPublicSyncAnikotoRoute
   '/download/$malId/$episode': typeof DownloadMalIdEpisodeRoute
   '/watch/$malId/$episode': typeof WatchMalIdEpisodeRoute
   '/api/public/worker/rpc': typeof ApiPublicWorkerRpcRoute
@@ -234,6 +243,7 @@ export interface FileRouteTypes {
     | '/genre/$genreId'
     | '/api/public/health-check'
     | '/api/public/scout'
+    | '/api/public/sync-anikoto'
     | '/download/$malId/$episode'
     | '/watch/$malId/$episode'
     | '/api/public/worker/rpc'
@@ -257,6 +267,7 @@ export interface FileRouteTypes {
     | '/genre/$genreId'
     | '/api/public/health-check'
     | '/api/public/scout'
+    | '/api/public/sync-anikoto'
     | '/download/$malId/$episode'
     | '/watch/$malId/$episode'
     | '/api/public/worker/rpc'
@@ -281,6 +292,7 @@ export interface FileRouteTypes {
     | '/genre/$genreId'
     | '/api/public/health-check'
     | '/api/public/scout'
+    | '/api/public/sync-anikoto'
     | '/download/$malId/$episode'
     | '/watch/$malId/$episode'
     | '/api/public/worker/rpc'
@@ -302,6 +314,7 @@ export interface RootRouteChildren {
   GenreGenreIdRoute: typeof GenreGenreIdRoute
   ApiPublicHealthCheckRoute: typeof ApiPublicHealthCheckRoute
   ApiPublicScoutRoute: typeof ApiPublicScoutRoute
+  ApiPublicSyncAnikotoRoute: typeof ApiPublicSyncAnikotoRoute
   DownloadMalIdEpisodeRoute: typeof DownloadMalIdEpisodeRoute
   WatchMalIdEpisodeRoute: typeof WatchMalIdEpisodeRoute
   ApiPublicWorkerRpcRoute: typeof ApiPublicWorkerRpcRoute
@@ -442,6 +455,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DownloadMalIdEpisodeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/sync-anikoto': {
+      id: '/api/public/sync-anikoto'
+      path: '/api/public/sync-anikoto'
+      fullPath: '/api/public/sync-anikoto'
+      preLoaderRoute: typeof ApiPublicSyncAnikotoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/scout': {
       id: '/api/public/scout'
       path: '/api/public/scout'
@@ -500,6 +520,7 @@ const rootRouteChildren: RootRouteChildren = {
   GenreGenreIdRoute: GenreGenreIdRoute,
   ApiPublicHealthCheckRoute: ApiPublicHealthCheckRoute,
   ApiPublicScoutRoute: ApiPublicScoutRoute,
+  ApiPublicSyncAnikotoRoute: ApiPublicSyncAnikotoRoute,
   DownloadMalIdEpisodeRoute: DownloadMalIdEpisodeRoute,
   WatchMalIdEpisodeRoute: WatchMalIdEpisodeRoute,
   ApiPublicWorkerRpcRoute: ApiPublicWorkerRpcRoute,
@@ -507,3 +528,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
