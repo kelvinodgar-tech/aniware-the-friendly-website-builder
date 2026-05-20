@@ -236,6 +236,36 @@ export type Database = {
         }
         Relationships: []
       }
+      sync_state: {
+        Row: {
+          cursor_page: number
+          last_error: string | null
+          last_full_pass_at: string | null
+          last_run_at: string | null
+          provider: string
+          total_pages: number | null
+          updated_at: string
+        }
+        Insert: {
+          cursor_page?: number
+          last_error?: string | null
+          last_full_pass_at?: string | null
+          last_run_at?: string | null
+          provider: string
+          total_pages?: number | null
+          updated_at?: string
+        }
+        Update: {
+          cursor_page?: number
+          last_error?: string | null
+          last_full_pass_at?: string | null
+          last_run_at?: string | null
+          provider?: string
+          total_pages?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
