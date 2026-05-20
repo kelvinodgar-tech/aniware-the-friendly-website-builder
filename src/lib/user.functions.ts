@@ -72,6 +72,39 @@ export const getMyHistory = createServerFn({ method: "GET" })
     return data ?? [];
   });
 
+export const getEpisodeProgress = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z.object({ malId: z.number().int().positive(), episode: z.number().int().positive() }).parse(d)
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: row } = await supabase
+      .from("watch_progress")
+      .select("position_seconds, duration_seconds, completed, updated_at")
+      .eq("user_id", userId)
+      .eq("mal_id", data.malId)
+      .eq("episode_number", data.episode)
+      .maybeSingle();
+    return row;
+  });
+
+export const getAnimeProgress = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ malId: z.number().int().positive() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: rows } = await supabase
+      .from("watch_progress")
+      .select("episode_number, position_seconds, duration_seconds, completed, updated_at")
+      .eq("user_id", userId)
+      .eq("mal_id", data.malId)
+      .order("updated_at", { ascending: false });
+    const latest = rows?.[0] ?? null;
+    return { latest, all: rows ?? [] };
+  });
+
+
 export const isMyAdmin = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
