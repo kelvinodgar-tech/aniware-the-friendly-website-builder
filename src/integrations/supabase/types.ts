@@ -206,6 +206,36 @@ export type Database = {
         }
         Relationships: []
       }
+      provider_map: {
+        Row: {
+          external_id: string
+          id: string
+          mal_id: number
+          provider: string
+          slug: string | null
+          total_episodes: number | null
+          updated_at: string
+        }
+        Insert: {
+          external_id: string
+          id?: string
+          mal_id: number
+          provider: string
+          slug?: string | null
+          total_episodes?: number | null
+          updated_at?: string
+        }
+        Update: {
+          external_id?: string
+          id?: string
+          mal_id?: number
+          provider?: string
+          slug?: string | null
+          total_episodes?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
