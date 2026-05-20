@@ -17,14 +17,17 @@ export const saveProgress = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    await supabase.from("watch_progress").upsert({
-      user_id: userId,
-      mal_id: data.malId,
-      episode_number: data.episode,
-      position_seconds: data.position,
-      duration_seconds: data.duration ?? null,
-      completed: data.completed ?? false,
-    });
+    await supabase.from("watch_progress").upsert(
+      {
+        user_id: userId,
+        mal_id: data.malId,
+        episode_number: data.episode,
+        position_seconds: data.position,
+        duration_seconds: data.duration ?? null,
+        completed: data.completed ?? false,
+      },
+      { onConflict: "user_id,mal_id,episode_number" }
+    );
     return { ok: true };
   });
 
