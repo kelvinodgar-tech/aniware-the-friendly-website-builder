@@ -1,14 +1,16 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Download, RefreshCw, AlertTriangle } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, Download, RefreshCw, AlertTriangle, Play } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { getEpisodeSources } from "@/lib/anime.functions";
+import { getEpisodeProgress, saveProgress } from "@/lib/user.functions";
+import { useAuth } from "@/hooks/use-auth";
 import { PROVIDER_LABEL } from "@/lib/providers";
 
 type EpisodeSource = {
@@ -22,6 +24,13 @@ type EpisodeSource = {
 
 function isDirectPlayable(source: EpisodeSource) {
   return source.server_name === "direct" || /\.(m3u8|mp4|webm|ogg)(\?|$)/i.test(source.embed_url);
+}
+
+function formatTime(s: number) {
+  if (!s || !isFinite(s)) return "0:00";
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return `${m}:${sec.toString().padStart(2, "0")}`;
 }
 
 export const Route = createFileRoute("/watch/$malId/$episode")({
@@ -39,12 +48,23 @@ function WatchPage() {
   const ep = Number(episode);
   const id = Number(malId);
   const fn = useServerFn(getEpisodeSources);
+  const getProgress = useServerFn(getEpisodeProgress);
+  const save = useServerFn(saveProgress);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const q = useQuery({
     queryKey: ["sources", id, ep],
     queryFn: () => fn({ data: { malId: id, episode: ep } }),
   });
+
+  // resume info (auth-only)
+  const progressQ = useQuery({
+    queryKey: ["progress", id, ep, user?.id ?? null],
+    queryFn: () => getProgress({ data: { malId: id, episode: ep } }),
+    enabled: !!user,
+  });
+  const resumeAt = progressQ.data?.position_seconds ?? 0;
 
   const sources = q.data?.sources ?? [];
   const anime = q.data?.anime;
@@ -72,6 +92,43 @@ function WatchPage() {
     if (next > 0) navigate({ to: "/watch/$malId/$episode", params: { malId, episode: String(next) } });
   };
 
+  // Mark this episode as "watching" once the player has a source.
+  // For iframe mirrors we cannot read playback time cross-origin, so this is
+  // the only persistence we get — but it's enough for episode-level resume.
+  const markedRef = useRef(false);
+  useEffect(() => {
+    if (!user || !current || markedRef.current) return;
+    markedRef.current = true;
+    save({ data: { malId: id, episode: ep, position: 0 } }).catch(() => {});
+  }, [user, current, id, ep, save]);
+
+  // Stable callback for the direct player to push heartbeats.
+  const onProgress = useCallback(
+    (position: number, duration: number) => {
+      if (!user) return;
+      const completed = duration > 0 && position / duration > 0.9;
+      save({
+        data: {
+          malId: id,
+          episode: ep,
+          position: Math.floor(position),
+          duration: Math.floor(duration) || undefined,
+          completed,
+        },
+      }).catch(() => {});
+    },
+    [user, id, ep, save]
+  );
+
+  const [seekTo, setSeekTo] = useState<number>(0);
+  const [showResume, setShowResume] = useState(false);
+  useEffect(() => {
+    // Show resume banner once when meaningful progress exists.
+    if (resumeAt > 10) setShowResume(true);
+  }, [resumeAt]);
+
+  const directResume = current && isDirectPlayable(current) ? seekTo : 0;
+
   return (
     <div className="container mx-auto px-4 py-8">
       <Link to="/anime/$malId" params={{ malId }} className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center mb-4">
@@ -84,7 +141,12 @@ function WatchPage() {
             <Skeleton className="w-full h-full" />
           ) : current ? (
             isDirectPlayable(current) ? (
-              <DirectVideoPlayer key={`${playerKey}-${current.id}`} source={current} />
+              <DirectVideoPlayer
+                key={`${playerKey}-${current.id}`}
+                source={current}
+                startAt={directResume}
+                onProgress={onProgress}
+              />
             ) : (
               <iframe
                 key={`${playerKey}-${current.id}`}
@@ -103,6 +165,42 @@ function WatchPage() {
           )}
         </AspectRatio>
       </div>
+
+      {/* Resume banner */}
+      {showResume && current && (
+        <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/10 px-4 py-2.5">
+          <div className="flex items-center gap-2 text-sm">
+            <Play className="w-4 h-4 text-primary" />
+            <span>
+              {isDirectPlayable(current)
+                ? `Continue from ${formatTime(resumeAt)}`
+                : `You were watching this episode — pick up where you left off`}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            {isDirectPlayable(current) && (
+              <Button
+                size="sm"
+                variant="default"
+                className="bg-gradient-primary"
+                onClick={() => {
+                  setSeekTo(resumeAt);
+                  setPlayerKey((k) => k + 1);
+                  setShowResume(false);
+                }}
+              >
+                Resume
+              </Button>
+            )}
+            <button
+              className="text-xs text-muted-foreground hover:text-foreground"
+              onClick={() => setShowResume(false)}
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="mt-5 flex flex-wrap items-center gap-3">
         <Button variant="outline" size="sm" onClick={() => goEp(-1)} disabled={ep <= 1}>
@@ -158,7 +256,15 @@ function WatchPage() {
   );
 }
 
-function DirectVideoPlayer({ source }: { source: EpisodeSource }) {
+function DirectVideoPlayer({
+  source,
+  startAt,
+  onProgress,
+}: {
+  source: EpisodeSource;
+  startAt: number;
+  onProgress: (position: number, duration: number) => void;
+}) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [error, setError] = useState(false);
 
@@ -168,6 +274,13 @@ function DirectVideoPlayer({ source }: { source: EpisodeSource }) {
     let hls: import("hls.js").default | null = null;
     let cancelled = false;
     setError(false);
+
+    const onLoaded = () => {
+      if (startAt > 0 && startAt < (video.duration || Infinity)) {
+        try { video.currentTime = startAt; } catch {}
+      }
+    };
+    video.addEventListener("loadedmetadata", onLoaded);
 
     if (/\.m3u8(\?|$)/i.test(source.embed_url) && !video.canPlayType("application/vnd.apple.mpegurl")) {
       import("hls.js")
@@ -191,11 +304,35 @@ function DirectVideoPlayer({ source }: { source: EpisodeSource }) {
 
     return () => {
       cancelled = true;
+      video.removeEventListener("loadedmetadata", onLoaded);
       hls?.destroy();
       video.removeAttribute("src");
       video.load();
     };
-  }, [source.id, source.embed_url]);
+  }, [source.id, source.embed_url, startAt]);
+
+  // Heartbeat: persist position every ~10s while playing + on pause/unmount.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    let last = 0;
+    const tick = () => {
+      const now = Date.now();
+      if (now - last < 10000) return;
+      last = now;
+      onProgress(video.currentTime || 0, video.duration || 0);
+    };
+    const flush = () => onProgress(video.currentTime || 0, video.duration || 0);
+    video.addEventListener("timeupdate", tick);
+    video.addEventListener("pause", flush);
+    window.addEventListener("beforeunload", flush);
+    return () => {
+      video.removeEventListener("timeupdate", tick);
+      video.removeEventListener("pause", flush);
+      window.removeEventListener("beforeunload", flush);
+      flush();
+    };
+  }, [onProgress]);
 
   return (
     <div className="relative w-full h-full bg-black">
