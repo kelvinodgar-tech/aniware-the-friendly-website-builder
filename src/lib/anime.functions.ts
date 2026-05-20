@@ -162,7 +162,17 @@ async function provisionFromAnikoto(malId: number) {
   if (!externalId) return;
 
   const series = await anikotoSeries(externalId);
-  const rows: Array<Record<string, unknown>> = [];
+  const rows: Array<{
+    mal_id: number;
+    episode_number: number;
+    server_name: string;
+    quality: string;
+    embed_url: string;
+    language: string;
+    priority: number;
+    is_active: boolean;
+    status: string;
+  }> = [];
   for (const ep of series.episodes ?? []) {
     for (const lang of ["sub", "dub"] as const) {
       const url = ep.embed_url?.[lang];
