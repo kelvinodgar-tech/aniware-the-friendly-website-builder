@@ -13,6 +13,8 @@ import {
   toAnimeRow,
 } from "@/lib/jikan";
 import { detectFailureFromHtml, detectProvider } from "@/lib/providers";
+import { anikotoRecentPage, anikotoSeries } from "@/lib/anikoto";
+
 
 // 24h cache
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
@@ -127,16 +129,116 @@ export const getEpisodeSources = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const anime = await cacheAnime(data.malId);
 
-    let { data: links } = await supabaseAdmin
-      .from("media_links")
-      .select("*")
-      .eq("mal_id", data.malId)
-      .eq("episode_number", data.episode)
-      .eq("is_active", true)
-      .order("priority", { ascending: true });
-
-    return { anime, sources: links ?? [] };
+    let sources = await fetchActiveLinks(data.malId, data.episode);
+    if (sources.length === 0) {
+      await provisionFromAnikoto(data.malId).catch((e) => console.error("anikoto provision failed", e));
+      sources = await fetchActiveLinks(data.malId, data.episode);
+    }
+    return { anime, sources };
   });
+
+async function fetchActiveLinks(malId: number, episode: number) {
+  const { data } = await supabaseAdmin
+    .from("media_links")
+    .select("*")
+    .eq("mal_id", malId)
+    .eq("episode_number", episode)
+    .eq("is_active", true)
+    .order("priority", { ascending: true });
+  return data ?? [];
+}
+
+// --- Anikoto auto-provisioning -------------------------------------------------
+// Anikoto (anikotoapi.site) returns megaplay.buzz iframe URLs keyed by its own
+// internal series id. We map MAL → Anikoto id in the provider_map table.
+
+const ANIKOTO = "anikoto";
+
+async function provisionFromAnikoto(malId: number) {
+  let externalId = await getAnikotoId(malId);
+  if (!externalId) {
+    externalId = await discoverAnikotoId(malId);
+  }
+  if (!externalId) return;
+
+  const series = await anikotoSeries(externalId);
+  const rows: Array<{
+    mal_id: number;
+    episode_number: number;
+    server_name: string;
+    quality: string;
+    embed_url: string;
+    language: string;
+    priority: number;
+    is_active: boolean;
+    status: string;
+  }> = [];
+  for (const ep of series.episodes ?? []) {
+    for (const lang of ["sub", "dub"] as const) {
+      const url = ep.embed_url?.[lang];
+      if (!url) continue;
+      rows.push({
+        mal_id: malId,
+        episode_number: ep.number,
+        server_name: "anikoto",
+        quality: "720p",
+        embed_url: url,
+        language: lang,
+        priority: lang === "sub" ? 8 : 9,
+        is_active: true,
+        status: "healthy",
+      });
+    }
+  }
+  if (rows.length === 0) return;
+  const { error } = await supabaseAdmin
+    .from("media_links")
+    .upsert(rows, { onConflict: "mal_id,episode_number,server_name,language" });
+  if (error) console.error("anikoto upsert failed", error.message);
+}
+
+async function getAnikotoId(malId: number): Promise<string | null> {
+  const { data } = await supabaseAdmin
+    .from("provider_map")
+    .select("external_id")
+    .eq("provider", ANIKOTO)
+    .eq("mal_id", malId)
+    .maybeSingle();
+  return data?.external_id ?? null;
+}
+
+// Scan recent-anime pages, caching every mal_id→anikoto_id we encounter.
+// First-hit cost is real (sequential pages) but every future request is O(1).
+async function discoverAnikotoId(targetMalId: number, maxPages = 30): Promise<string | null> {
+  for (let page = 1; page <= maxPages; page++) {
+    let res;
+    try {
+      res = await anikotoRecentPage(page, 100);
+    } catch (e) {
+      console.error("anikoto recent page failed", page, e);
+      return null;
+    }
+    const rows = (res.data ?? [])
+      .filter((r) => r.mal_id)
+      .map((r) => ({
+        provider: ANIKOTO,
+        mal_id: Number(r.mal_id),
+        external_id: String(r.id),
+        slug: r.slug ?? null,
+        total_episodes: r.episodes ? Number(r.episodes) || null : null,
+      }));
+    if (rows.length) {
+      await supabaseAdmin
+        .from("provider_map")
+        .upsert(rows, { onConflict: "provider,mal_id" });
+    }
+    const hit = rows.find((r) => r.mal_id === targetMalId);
+    if (hit) return hit.external_id;
+    if (page >= (res.pagination?.total_pages ?? 0)) break;
+  }
+  return null;
+}
+
 
 // --- Admin: media links CRUD ---
 const linkSchema = z.object({
