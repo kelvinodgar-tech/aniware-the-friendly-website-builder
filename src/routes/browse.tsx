@@ -16,10 +16,10 @@ export const Route = createFileRoute("/browse")({
   }),
   head: () => ({
     meta: [
-      { title: "Browse anime — Aniware" },
-      { name: "description", content: "Search and discover anime by title on Aniware." },
-      { property: "og:title", content: "Browse anime — Aniware" },
-      { property: "og:description", content: "Search and discover anime by title on Aniware." },
+      { title: "Browse anime — animerewa" },
+      { name: "description", content: "Search and discover anime by title on animerewa." },
+      { property: "og:title", content: "Browse anime — animerewa" },
+      { property: "og:description", content: "Search and discover anime by title on animerewa." },
     ],
   }),
   component: Browse,

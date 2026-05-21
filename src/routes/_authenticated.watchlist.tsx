@@ -6,7 +6,7 @@ import { AnimeCard } from "@/components/anime-card";
 import { getMyWatchlist } from "@/lib/user.functions";
 
 export const Route = createFileRoute("/_authenticated/watchlist")({
-  head: () => ({ meta: [{ title: "My watchlist — Aniware" }] }),
+  head: () => ({ meta: [{ title: "My watchlist — animerewa" }] }),
   component: WatchlistPage,
 });
 

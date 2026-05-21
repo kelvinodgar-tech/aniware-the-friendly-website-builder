@@ -63,10 +63,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Aniware — Stream & track anime" },
-      { name: "description", content: "Aniware is a modern anime catalog and watch hub: browse, track, and stream from multiple mirrors." },
+      { title: "animerewa — Stream & track anime" },
+      { name: "description", content: "animerewa is a modern anime catalog and watch hub: browse, track, and stream from multiple mirrors." },
       { name: "theme-color", content: "#0a0a1a" },
-      { property: "og:title", content: "Aniware" },
+      { property: "og:title", content: "animerewa" },
       { property: "og:description", content: "Stream & track anime. Modern, fast, mirror-aware." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

@@ -36,8 +36,8 @@ function formatTime(s: number) {
 export const Route = createFileRoute("/watch/$malId/$episode")({
   head: ({ params }) => ({
     meta: [
-      { title: `Watch episode ${params.episode} — Aniware` },
-      { name: "description", content: "Watch this episode on Aniware with automatic mirror fallback." },
+      { title: `Watch episode ${params.episode} — animerewa` },
+      { name: "description", content: "Watch this episode on animerewa with automatic mirror fallback." },
     ],
   }),
   component: WatchPage,

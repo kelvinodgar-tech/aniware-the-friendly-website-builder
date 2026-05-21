@@ -5,7 +5,7 @@ import { History } from "lucide-react";
 import { getMyHistory } from "@/lib/user.functions";
 
 export const Route = createFileRoute("/_authenticated/history")({
-  head: () => ({ meta: [{ title: "Continue watching — Aniware" }] }),
+  head: () => ({ meta: [{ title: "Continue watching — animerewa" }] }),
   component: HistoryPage,
 });
 

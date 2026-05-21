@@ -9,8 +9,8 @@ export const Route = createFileRoute("/genre/$genreId")({
   validateSearch: (s: Record<string, unknown>) => ({ name: typeof s.name === "string" ? s.name : "" }),
   head: () => ({
     meta: [
-      { title: "Genre — Aniware" },
-      { name: "description", content: "Browse anime in this genre on Aniware." },
+      { title: "Genre — animerewa" },
+      { name: "description", content: "Browse anime in this genre on animerewa." },
     ],
   }),
   component: GenrePage,

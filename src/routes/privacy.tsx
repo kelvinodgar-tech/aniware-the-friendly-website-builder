@@ -4,8 +4,8 @@ import { LegalPage } from "@/components/legal-page";
 export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
-      { title: "Privacy Policy — Aniware" },
-      { name: "description", content: "How Aniware handles your data." },
+      { title: "Privacy Policy — animerewa" },
+      { name: "description", content: "How animerewa handles your data." },
     ],
   }),
   component: () => (
@@ -19,13 +19,13 @@ export const Route = createFileRoute("/privacy")({
       </ul>
       <h2>What we don't collect</h2>
       <ul>
-        <li>Payment data — Aniware is free.</li>
+        <li>Payment data — animerewa is free.</li>
         <li>Behavioral ad-tracking cookies.</li>
       </ul>
       <h2>Third parties</h2>
       <p>Embedded mirror players load directly from third-party hosts. Those hosts may set their own cookies or run their own analytics inside the embed iframe. We have no control over them.</p>
       <h2>Your rights</h2>
-      <p>You can delete your account at any time, which removes your profile, watchlist, and progress. Email us at <a href="mailto:privacy@aniware.app">privacy@aniware.app</a>.</p>
+      <p>You can delete your account at any time, which removes your profile, watchlist, and progress. Email us at <a href="mailto:privacy@animerewa.app">privacy@animerewa.app</a>.</p>
     </LegalPage>
   ),
 });

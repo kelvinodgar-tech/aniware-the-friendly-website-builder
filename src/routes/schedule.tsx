@@ -18,7 +18,7 @@ function todayKey(): Day {
 export const Route = createFileRoute("/schedule")({
   head: () => ({
     meta: [
-      { title: "Schedule — Aniware" },
+      { title: "Schedule — animerewa" },
       { name: "description", content: "Weekly anime broadcasting schedule. See what airs each day." },
     ],
   }),

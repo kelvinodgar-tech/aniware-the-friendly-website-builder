@@ -4,15 +4,15 @@ import { LegalPage } from "@/components/legal-page";
 export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
-      { title: "Terms of Service — Aniware" },
-      { name: "description", content: "Terms governing the use of Aniware." },
+      { title: "Terms of Service — animerewa" },
+      { name: "description", content: "Terms governing the use of animerewa." },
     ],
   }),
   component: () => (
     <LegalPage title="Terms of Service" updated="May 2026">
-      <p>By accessing Aniware you agree to these terms. If you don't agree, please don't use the service.</p>
+      <p>By accessing animerewa you agree to these terms. If you don't agree, please don't use the service.</p>
       <h2>1. Service</h2>
-      <p>Aniware provides a catalog UI and embeds player frames from third-party hosts. We do not host, upload, or transmit video data ourselves.</p>
+      <p>animerewa provides a catalog UI and embeds player frames from third-party hosts. We do not host, upload, or transmit video data ourselves.</p>
       <h2>2. Accounts</h2>
       <p>You're responsible for activity under your account. Don't share credentials. Don't attempt to abuse, scrape, or overload the service.</p>
       <h2>3. Third-party content</h2>

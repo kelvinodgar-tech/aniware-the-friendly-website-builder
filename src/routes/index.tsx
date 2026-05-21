@@ -10,10 +10,10 @@ import { getSeasonNow, getTrending } from "@/lib/anime.functions";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Aniware — Stream & track anime" },
-      { name: "description", content: "Browse trending and seasonal anime, save favorites, and stream from multiple mirrors on Aniware." },
-      { property: "og:title", content: "Aniware — Stream & track anime" },
-      { property: "og:description", content: "Browse trending and seasonal anime on Aniware." },
+      { title: "animerewa — Stream & track anime" },
+      { name: "description", content: "Browse trending and seasonal anime, save favorites, and stream from multiple mirrors on animerewa." },
+      { property: "og:title", content: "animerewa — Stream & track anime" },
+      { property: "og:description", content: "Browse trending and seasonal anime on animerewa." },
     ],
   }),
   component: Home,

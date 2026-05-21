@@ -13,8 +13,8 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/anime/$malId")({
   head: ({ params }) => ({
     meta: [
-      { title: `Anime #${params.malId} — Aniware` },
-      { name: "description", content: "Watch episodes, read details, and add to your list on Aniware." },
+      { title: `Anime #${params.malId} — animerewa` },
+      { name: "description", content: "Watch episodes, read details, and add to your list on animerewa." },
     ],
   }),
   component: AnimePage,

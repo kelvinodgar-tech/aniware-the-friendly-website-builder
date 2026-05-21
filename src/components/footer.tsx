@@ -10,7 +10,7 @@ export function Footer() {
             <div className="w-7 h-7 rounded-md bg-gradient-primary flex items-center justify-center">
               <Sparkles className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="font-display font-bold">Aniware</span>
+            <span className="font-display font-bold">animerewa</span>
           </div>
           <p className="text-sm text-muted-foreground max-w-xs">
             A modern anime catalog and watch hub powered by community mirrors.
@@ -40,13 +40,13 @@ export function Footer() {
         <div className="text-sm text-muted-foreground">
           <h4 className="font-semibold mb-3 text-foreground">Disclaimer</h4>
           <p>
-            Aniware does not host any media files. All embedded content is provided by
+            animerewa does not host any media files. All embedded content is provided by
             unaffiliated third-party services.
           </p>
         </div>
       </div>
       <div className="border-t border-border/40 py-4 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} Aniware
+        © {new Date().getFullYear()} animerewa
       </div>
     </footer>
   );
