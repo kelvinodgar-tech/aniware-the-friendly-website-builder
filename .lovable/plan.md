@@ -1,78 +1,71 @@
-# Aniware — Build Plan
+## Plan: animerewa rebrand + cleanup + fixes
 
-A clean, dark "Midnight Indigo" anime streaming site. Backend uses Lovable Cloud (Supabase). Heavy ingestion/processing (FFmpeg, torrents, Real-Debrid, remote uploads) is intentionally **out of scope** — that lives on an external worker you run separately. The web app handles browsing, watching via iframe embeds, downloads, admin entry of links, and automated provider health checks.
+This is a large set of changes, grouped so we can ship them safely in one pass.
 
-## Scope (what gets built)
+### 1. Rebrand to **animerewa**
+- Replace "Aniware" everywhere (header, footer, copy, JSON-LD, og:site_name, page titles).
+- New anime-themed logo + favicon (generated PNG, used in `<link rel="icon">` and as logo component).
+- New OG/Twitter share image (1200×630, anime-styled, with "animerewa" wordmark).
+- Update `__root.tsx` head defaults: title template, og:site_name, og:image, twitter:image, structured data.
 
-**In:**
-- Public site: Home, Browse/Search, Anime detail with episode grid, Watch page, custom Download page
-- Auth: email/password + Google sign-in, user profiles
-- User features: watchlist, continue-watching, watch progress
-- Admin panel: add/edit `media_links`, view provider health, trigger re-check
-- Provider abstraction: Streamtape (primary) + Mp4Upload (fallback); generic iframe support
-- Health check server function (HTTP probe + HTML body check) callable from admin and a cron-style public endpoint
-- Metadata from Jikan API (no key needed) with caching
+### 2. Remove the download page
+- Delete `src/routes/download.$malId.$episode.tsx` (and route from `routeTree.gen.ts` regeneration).
+- Remove "Download" button from watch page and any links pointing to it.
+- Remove ingestion/torrent leftovers from copy: Streamtape, DoodStream, magnet/torrent mentions (UI strings only, not the historical `ingestion_jobs` table — that we just leave dormant).
 
-**Out (needs external worker; documented in README):**
-- Torrent/Real-Debrid ingestion, FFmpeg processing, automated remote-uploads to Streamtape/Mp4Upload, queue workers, dead-letter queue, dynamic scaling
+### 3. Watch page: dub/sub + seamless switching
+- Group mirrors by language; show **SUB / DUB** as a segmented control (only languages that have a mirror are shown).
+- The server dropdown shows the provider label (e.g. "Anikoto") without changing language.
+- Switching server within the **same language** swaps the iframe `src` only — no remount of surrounding chrome. Changing language naturally reloads (different stream).
+- Resume banner already exists; keep it, but ensure the marker writes only once per (episode,language) so changing dub/sub doesn't double-count.
 
-## Pages / Routes
+### 4. Fix Watchlist + Continue Watching UX
+- Watchlist toggle: optimistic update, toast on add/remove, button state flips immediately ("In watchlist ✓" vs "+ Watchlist"). Invalidate the `["watchlist"]` query so `/watchlist` reflects changes instantly.
+- Continue Watching: surface a row on the home page from `watch_progress` joined with `anime_cache`. Show poster, last episode, progress bar, "Resume" CTA → `/watch/$malId/$episode`.
+- Verify `saveProgress` upsert key (already `user_id,mal_id,episode_number`) and that the heartbeat actually fires for iframe players too (it currently only fires for direct/HLS). For iframes we keep the "episode-level" marker — that's the best we can do cross-origin.
 
-- `/` — hero, trending (Jikan top), seasonal, recently added (rows from our DB)
-- `/browse` — search + filter (genre, status, year) backed by Jikan
-- `/anime/$malId` — synopsis, poster, metadata, episode grid with availability badges
-- `/watch/$malId/$episode` — 16:9 iframe player, provider switcher, quality switcher, prev/next, auto-fallback, subtitle loader
-- `/download/$malId/$episode` — quality picker → "Preparing…" → redirect to best healthy mirror
-- `/login`, `/signup`, `/reset-password`
-- `/_authenticated/watchlist`, `/_authenticated/history`
-- `/_authenticated/_admin/` — dashboard, `media_links` CRUD, provider health, recheck button
-- `/api/public/health-check` — POST (signed) to run a batch health pass
+### 5. Catalog hygiene — drop irrelevant entries
+- Anything in `anime_cache` that has no provider_map row AND no media_links is junk from older Jikan scout passes. Migration: delete those rows.
+- Tighten the Jikan scout / search path to only cache results that have a MAL id and at least one of (year ≥ 2000, score ≥ 6, popularity rank set) — prevents "Adventure of Gamba" style noise.
+- Make sure browse/search reads filter to anime that actually have media_links OR a provider_map entry, so the visible catalog == what we can play.
 
-## Database (Lovable Cloud)
+### 6. Background sync still healthy
+- Verify `sync_state` cursor is advancing; if `last_run_at` is stale we re-trigger once and confirm the cron is wired.
+- No code change unless the cron drifted; just confirm in this turn.
 
-- `profiles` (id → auth.users, username, avatar_url)
-- `user_roles` (user_id, role: 'admin'|'user') + `has_role()` security definer
-- `anime_cache` (mal_id PK, title, synopsis, poster_url, episodes, year, genres jsonb, updated_at) — Jikan cache
-- `media_links` (id, mal_id, episode_number, server_name, quality, embed_url, direct_download_url, subtitle_url, priority, is_active, status, last_checked_at, last_failed_at, retry_count, health_score, created_at)
-- `watch_progress` (user_id, mal_id, episode_number, position_seconds, updated_at) — composite PK
-- `watchlist` (user_id, mal_id, added_at)
-- RLS: public read on `anime_cache` + active `media_links`; user-scoped on `watch_progress`/`watchlist`; admin-only write on `media_links` via `has_role`
+### 7. Perf — fix sluggish scroll
+- Audit `backdrop-blur` usage on header / cards. Replace with solid `bg-background/90` + `border-b` and use `text-shadow` where readability over busy backgrounds matters.
+- Add `content-visibility: auto` to long lists (episode grid, browse grid).
+- Lazy-load anime poster images (`loading="lazy"`, `decoding="async"`).
+- Drop any framer-motion on scroll-mounted decorative pieces.
 
-## Server functions
+### 8. Remove "sparkles" / AI patterns
+- Remove decorative `Sparkles` icon usages and gradient "AI shimmer" backgrounds. Keep the gradient brand accents on CTAs.
 
-- `getAnimeDetails(malId)` — cache-through to Jikan
-- `searchAnime(query, filters)` — Jikan proxy with rate-limit friendly debounce
-- `getEpisodeSources(malId, ep)` — returns active sources ordered by priority + health
-- `checkProviderHealth(linkId)` — fetches embed URL, inspects status + body for Streamtape/Mp4Upload removal markers; updates row
-- `batchHealthCheck()` — iterates stale links (admin/cron)
-- `upsertMediaLink(...)` — admin only (RLS-checked)
+### 9. Episode grid redesign
+- Replace current list with a compact responsive grid: numbered tiles, current episode highlighted, watched tiles dimmed with a check, hover shows title if available. Virtualize if > 100 episodes.
 
-## UI / Design
+### 10. "Proxy the database to cloak it"
+- The Supabase URL + anon key are already shipped in the client bundle (this is by design — RLS is the security boundary). We will:
+  - Audit RLS so **no** table is readable without the policies it needs (already mostly the case — confirm `anime_cache`, `media_links`, `provider_map`, `sync_state` are intentional public reads; everything else requires auth).
+  - Route reads through server functions (`createServerFn`) for the pages that don't need realtime, so the browser hits `/api/...` instead of `*.supabase.co`. The anon key still exists but the network tab no longer shows the Supabase host for normal browsing.
+  - We will NOT build a full reverse proxy of `*.supabase.co` — that's a multi-day project and would break auth/realtime. If you want full hostname cloaking later, we'd set up a Cloudflare Worker in front of the project subdomain.
 
-- Midnight Indigo palette: bg `#0a0a1a`, surface `#141432`, deep `#1e1e5a`, accent `#4f46e5`
-- Typography: Space Grotesk (display) + Inter (body)
-- Components: shadcn (Card, Dialog, DropdownMenu, Skeleton, AspectRatio, Tabs, Badge)
-- Episode grid: responsive compact buttons, badges (SUB/1080p/MULTI), hover, watch-progress bar, skeleton states, pagination
-- Watch page: AspectRatio 16:9 iframe, provider/quality/subtitle selects, prev/next, autoplay-next toggle, fallback to next provider on iframe error
-- Download page: branded "Preparing your download…" with spinner, then `window.location =` direct URL
+### 11. SEO
+- After the rebrand lands, per-route `head()` already exists; update titles/descriptions to "animerewa" wording.
+- Trigger an SEO scan at the end and point you at the results panel.
 
-## Technical notes
+### Technical notes
+- All UI tokens stay in `src/styles.css` (semantic tokens, no hardcoded colors in components).
+- New logo + OG image are generated PNGs committed to `src/assets/` (logo) and `public/` (favicon + og-image).
+- Watchlist/resume hooks use TanStack Query's `invalidateQueries` for instant UI feedback.
 
-- TanStack Start file-routes, every public route gets unique `head()` meta
-- Loaders call server fns; admin loaders sit under `_authenticated/_admin/` layout with role guard
-- Provider abstraction module `src/lib/providers/{streamtape,mp4upload,generic}.ts` exposing `{ validateEmbedHtml(html), normalizeUrl(url) }`
-- Health check uses `fetch` from server function (Worker-safe, no Node deps)
-- No torrent/FFmpeg code in this app — README documents the external worker contract: it inserts rows into `media_links` via service-role key
+### Anime test set (after sync)
+I'll send 3 titles for you to spot-check once the changes ship.
 
-## Build order
+---
 
-1. Enable Lovable Cloud, create schema + RLS + roles
-2. Auth (email+Google), profiles, role-guarded admin layout
-3. Jikan integration + caching server fns
-4. Home, Browse, Anime detail with episode grid
-5. Watch page with provider fallback + subtitles
-6. Custom Download page
-7. Admin: media_links CRUD + health dashboard
-8. Health-check server fn + public cron endpoint
-9. Watchlist + continue-watching
-10. Polish, SEO meta per route, README with external-worker contract
+**This plan is big — do you want me to execute the whole thing, or trim it?** Common trims:
+- Skip #10 (DB proxying) for now since the anon key is already RLS-safe.
+- Defer the OG/Twitter image regeneration if you want to provide your own art.
+- Defer episode-grid virtualization until we see a series that actually has > 100 eps in the cache.
