@@ -83,15 +83,23 @@
   * {
     border-color: var(--color-border);
   }
+  html {
+    /* Prevent jank when scrollbars appear/disappear */
+    scrollbar-gutter: stable;
+  }
   html, body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeSpeed;
   }
   h1, h2, h3, h4, h5 {
     font-family: var(--font-display);
     letter-spacing: -0.02em;
+  }
+  img {
+    content-visibility: auto;
   }
   ::selection {
     background: var(--primary);
@@ -109,3 +117,4 @@
   .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
   .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
 }
+

@@ -1,8 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Download, RefreshCw, AlertTriangle, Play } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, RefreshCw, AlertTriangle, Play } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -37,7 +37,7 @@ export const Route = createFileRoute("/watch/$malId/$episode")({
   head: ({ params }) => ({
     meta: [
       { title: `Watch episode ${params.episode} — animerewa` },
-      { name: "description", content: "Watch this episode on animerewa with automatic mirror fallback." },
+      { name: "description", content: "Watch this episode on animerewa, sub or dub." },
     ],
   }),
   component: WatchPage,
@@ -58,7 +58,6 @@ function WatchPage() {
     queryFn: () => fn({ data: { malId: id, episode: ep } }),
   });
 
-  // resume info (auth-only)
   const progressQ = useQuery({
     queryKey: ["progress", id, ep, user?.id ?? null],
     queryFn: () => getProgress({ data: { malId: id, episode: ep } }),
@@ -66,43 +65,55 @@ function WatchPage() {
   });
   const resumeAt = progressQ.data?.position_seconds ?? 0;
 
-  const sources = q.data?.sources ?? [];
+  const sources = (q.data?.sources ?? []) as EpisodeSource[];
   const anime = q.data?.anime;
 
-  const qualities = Array.from(new Set(sources.map((s) => s.quality)));
-  const [quality, setQuality] = useState<string>("");
-  const [provider, setProvider] = useState<string>("");
-  const [playerKey, setPlayerKey] = useState(0);
+  // Language groups (SUB / DUB) — only show what actually has a mirror.
+  const availableLangs = useMemo(() => {
+    const set = new Set<string>();
+    for (const s of sources) if (s.language) set.add(s.language);
+    return Array.from(set);
+  }, [sources]);
 
+  const [language, setLanguage] = useState<string>("");
   useEffect(() => {
-    if (qualities.length && !quality) setQuality(qualities.includes("720p") ? "720p" : qualities[0]);
-  }, [qualities, quality]);
-
-  const matching = sources.filter((s) => !quality || s.quality === quality);
-  useEffect(() => {
-    if (matching.length && !matching.find((s) => s.id === provider)) {
-      setProvider(matching[0].id);
+    if (!availableLangs.length) return;
+    if (!language || !availableLangs.includes(language)) {
+      setLanguage(availableLangs.includes("sub") ? "sub" : availableLangs[0]);
     }
-  }, [matching, provider]);
+  }, [availableLangs, language]);
 
-  const current = sources.find((s) => s.id === provider) ?? matching[0];
+  const langSources = useMemo(
+    () => sources.filter((s) => !language || s.language === language),
+    [sources, language]
+  );
 
+  const [provider, setProvider] = useState<string>("");
+  useEffect(() => {
+    if (langSources.length && !langSources.find((s) => s.id === provider)) {
+      setProvider(langSources[0].id);
+    }
+  }, [langSources, provider]);
+
+  const current = sources.find((s) => s.id === provider) ?? langSources[0];
+
+  const [playerNonce, setPlayerNonce] = useState(0);
   const goEp = (delta: number) => {
     const next = ep + delta;
     if (next > 0) navigate({ to: "/watch/$malId/$episode", params: { malId, episode: String(next) } });
   };
 
-  // Mark this episode as "watching" once the player has a source.
-  // For iframe mirrors we cannot read playback time cross-origin, so this is
-  // the only persistence we get — but it's enough for episode-level resume.
-  const markedRef = useRef(false);
+  // Mark episode as watching once per (episode,language). Changing language
+  // updates the marker so the right track gets resume credit.
+  const markedRef = useRef<string>("");
   useEffect(() => {
-    if (!user || !current || markedRef.current) return;
-    markedRef.current = true;
+    if (!user || !current) return;
+    const key = `${id}:${ep}:${current.language}`;
+    if (markedRef.current === key) return;
+    markedRef.current = key;
     save({ data: { malId: id, episode: ep, position: 0 } }).catch(() => {});
   }, [user, current, id, ep, save]);
 
-  // Stable callback for the direct player to push heartbeats.
   const onProgress = useCallback(
     (position: number, duration: number) => {
       if (!user) return;
@@ -123,7 +134,6 @@ function WatchPage() {
   const [seekTo, setSeekTo] = useState<number>(0);
   const [showResume, setShowResume] = useState(false);
   useEffect(() => {
-    // Show resume banner once when meaningful progress exists.
     if (resumeAt > 10) setShowResume(true);
   }, [resumeAt]);
 
@@ -142,14 +152,17 @@ function WatchPage() {
           ) : current ? (
             isDirectPlayable(current) ? (
               <DirectVideoPlayer
-                key={`${playerKey}-${current.id}`}
+                key={`${playerNonce}-${current.id}`}
                 source={current}
                 startAt={directResume}
                 onProgress={onProgress}
               />
             ) : (
+              // For iframe mirrors: keying ONLY on source.id (not playerNonce of
+              // surrounding state) keeps the iframe mounted across UI changes.
+              // Switching server within the same language swaps src only.
               <iframe
-                key={`${playerKey}-${current.id}`}
+                key={current.id}
                 src={current.embed_url}
                 allowFullScreen
                 allow="autoplay; fullscreen; picture-in-picture"
@@ -185,7 +198,7 @@ function WatchPage() {
                 className="bg-gradient-primary"
                 onClick={() => {
                   setSeekTo(resumeAt);
-                  setPlayerKey((k) => k + 1);
+                  setPlayerNonce((k) => k + 1);
                   setShowResume(false);
                 }}
               >
@@ -202,6 +215,7 @@ function WatchPage() {
         </div>
       )}
 
+      {/* Controls bar */}
       <div className="mt-5 flex flex-wrap items-center gap-3">
         <Button variant="outline" size="sm" onClick={() => goEp(-1)} disabled={ep <= 1}>
           <ChevronLeft className="w-4 h-4 mr-1" /> Prev
@@ -209,36 +223,44 @@ function WatchPage() {
         <Button variant="outline" size="sm" onClick={() => goEp(1)}>
           Next <ChevronRight className="w-4 h-4 ml-1" />
         </Button>
-        {qualities.length > 0 && (
-          <Select value={quality} onValueChange={setQuality}>
-            <SelectTrigger className="w-28"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {qualities.map((q) => <SelectItem key={q} value={q}>{q}</SelectItem>)}
-            </SelectContent>
-          </Select>
+
+        {/* SUB / DUB segmented control — only languages with mirrors are shown */}
+        {availableLangs.length > 0 && (
+          <div className="inline-flex rounded-md border border-border bg-surface/60 p-0.5">
+            {availableLangs.map((l) => (
+              <button
+                key={l}
+                type="button"
+                onClick={() => setLanguage(l)}
+                className={[
+                  "px-3 py-1.5 text-xs font-semibold uppercase tracking-wider rounded-sm transition-colors",
+                  language === l ? "bg-primary text-primary-foreground shadow-glow" : "text-muted-foreground hover:text-foreground",
+                ].join(" ")}
+              >
+                {l}
+              </button>
+            ))}
+          </div>
         )}
-        {matching.length > 0 && (
+
+        {/* Server picker — only within current language so switching never changes language */}
+        {langSources.length > 1 && (
           <Select value={provider} onValueChange={setProvider}>
             <SelectTrigger className="w-40"><SelectValue placeholder="Server" /></SelectTrigger>
             <SelectContent>
-              {matching.map((s) => (
+              {langSources.map((s) => (
                 <SelectItem key={s.id} value={s.id}>
                   {PROVIDER_LABEL[s.server_name as keyof typeof PROVIDER_LABEL] ?? s.server_name}
+                  {s.quality ? ` · ${s.quality}` : ""}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         )}
-        <Button variant="ghost" size="sm" onClick={() => setPlayerKey((k) => k + 1)}>
+
+        <Button variant="ghost" size="sm" onClick={() => setPlayerNonce((k) => k + 1)}>
           <RefreshCw className="w-4 h-4 mr-1" /> Reload
         </Button>
-        <div className="ml-auto">
-          <Button asChild variant="default" className="bg-gradient-primary">
-            <Link to="/download/$malId/$episode" params={{ malId, episode }}>
-              <Download className="w-4 h-4 mr-2" /> Download
-            </Link>
-          </Button>
-        </div>
       </div>
 
       <div className="mt-8">
@@ -246,9 +268,9 @@ function WatchPage() {
           {anime?.title_english || anime?.title} <span className="text-muted-foreground font-normal">— Episode {ep}</span>
         </h1>
         <div className="mt-2 flex flex-wrap gap-2">
-          {current && <Badge variant="secondary">{current.quality}</Badge>}
-          {current && <Badge variant="outline">{current.language?.toUpperCase()}</Badge>}
-          <Badge variant="outline">{matching.length} mirror{matching.length === 1 ? "" : "s"}</Badge>
+          {current?.quality && <Badge variant="secondary">{current.quality}</Badge>}
+          {current?.language && <Badge variant="outline" className="border-primary/40 text-primary">{current.language.toUpperCase()}</Badge>}
+          <Badge variant="outline">{langSources.length} mirror{langSources.length === 1 ? "" : "s"}</Badge>
         </div>
         {anime?.synopsis && <p className="mt-4 text-muted-foreground max-w-3xl line-clamp-4">{anime.synopsis}</p>}
       </div>
@@ -311,7 +333,6 @@ function DirectVideoPlayer({
     };
   }, [source.id, source.embed_url, startAt]);
 
-  // Heartbeat: persist position every ~10s while playing + on pause/unmount.
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;

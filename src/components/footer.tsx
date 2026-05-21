@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Sparkles } from "lucide-react";
+import logoMark from "@/assets/animerewa-logo.png";
 
 export function Footer() {
   return (
@@ -7,13 +7,11 @@ export function Footer() {
       <div className="container mx-auto px-4 py-10 grid gap-8 md:grid-cols-4">
         <div className="md:col-span-1">
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-7 h-7 rounded-md bg-gradient-primary flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-primary-foreground" />
-            </div>
+            <img src={logoMark} alt="animerewa" width={28} height={28} className="w-7 h-7 rounded-md" />
             <span className="font-display font-bold">animerewa</span>
           </div>
           <p className="text-sm text-muted-foreground max-w-xs">
-            A modern anime catalog and watch hub powered by community mirrors.
+            A modern anime catalog and watch hub. Stream sub or dub from one place.
           </p>
         </div>
 
@@ -40,8 +38,8 @@ export function Footer() {
         <div className="text-sm text-muted-foreground">
           <h4 className="font-semibold mb-3 text-foreground">Disclaimer</h4>
           <p>
-            animerewa does not host any media files. All embedded content is provided by
-            unaffiliated third-party services.
+            animerewa does not host any media files. All playable content is loaded
+            from independent third-party services.
           </p>
         </div>
       </div>

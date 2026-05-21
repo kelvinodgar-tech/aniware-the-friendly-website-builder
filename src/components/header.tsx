@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Search, User as UserIcon, LogOut, Shield, Heart, History, Sparkles } from "lucide-react";
+import { Search, User as UserIcon, LogOut, Shield, Heart, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useServerFn } from "@tanstack/react-start";
 import { isMyAdmin } from "@/lib/user.functions";
+import logoMark from "@/assets/animerewa-logo.png";
 
 export function Header() {
   const { user } = useAuth();
@@ -29,14 +30,18 @@ export function Header() {
   }, [user, checkAdmin]);
 
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/70 border-b border-border/50">
+    <header className="sticky top-0 z-50 bg-background/95 border-b border-border/60">
       <div className="container mx-auto px-4 h-16 flex items-center gap-4">
         <Link to="/" className="flex items-center gap-2 group">
-          <div className="w-9 h-9 rounded-lg bg-gradient-primary flex items-center justify-center shadow-glow">
-            <Sparkles className="w-5 h-5 text-primary-foreground" />
-          </div>
+          <img
+            src={logoMark}
+            alt="animerewa"
+            width={36}
+            height={36}
+            className="w-9 h-9 rounded-lg shadow-glow"
+          />
           <span className="font-display text-xl font-bold tracking-tight">
-            Ani<span className="text-primary">ware</span>
+            anime<span className="text-primary">rewa</span>
           </span>
         </Link>
 
