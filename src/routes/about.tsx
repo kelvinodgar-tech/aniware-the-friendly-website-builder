@@ -31,7 +31,7 @@ export const Route = createFileRoute("/about")({
       <h2>Get in touch</h2>
       <p>
         For takedown notices see our <a href="/dmca">DMCA</a> page. For everything
-        else, hit us at <a href="mailto:hello@animerewa.app">hello@animerewa.app</a>.
+        else, hit us at our support channel.
       </p>
     </LegalPage>
   ),

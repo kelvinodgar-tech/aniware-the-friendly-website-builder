@@ -25,7 +25,7 @@ export const Route = createFileRoute("/privacy")({
       <h2>Third parties</h2>
       <p>Embedded mirror players load directly from third-party hosts. Those hosts may set their own cookies or run their own analytics inside the embed iframe. We have no control over them.</p>
       <h2>Your rights</h2>
-      <p>You can delete your account at any time, which removes your profile, watchlist, and progress. Email us at <a href="mailto:privacy@animerewa.app">privacy@animerewa.app</a>.</p>
+      <p>You can delete your account at any time, which removes your profile, watchlist, and progress. Email us at our support channel.</p>
     </LegalPage>
   ),
 });

@@ -16,7 +16,7 @@ export const Route = createFileRoute("/dmca")({
         providers, the fastest path is to issue a takedown to <em>that provider</em>.
       </p>
       <h2>To remove an embed from animerewa</h2>
-      <p>If you'd like us to also remove the embed listing from our catalog, send the following to <a href="mailto:dmca@animerewa.app">dmca@animerewa.app</a>:</p>
+      <p>If you'd like us to also remove the embed listing from our catalog, send the following to our support channel:</p>
       <ul>
         <li>Identification of the copyrighted work (title, episode).</li>
         <li>The exact URL on animerewa where it appears.</li>
