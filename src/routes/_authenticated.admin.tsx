@@ -24,7 +24,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
     const { data } = await supabase.auth.getUser();
     if (!data.user) throw redirect({ to: "/login" });
   },
-  head: () => ({ meta: [{ title: "Admin — Aniware" }] }),
+  head: () => ({ meta: [{ title: "Admin — animerewa" }] }),
   component: AdminPage,
 });
 

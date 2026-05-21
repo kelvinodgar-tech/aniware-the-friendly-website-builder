@@ -7,8 +7,8 @@ import { Tag } from "lucide-react";
 export const Route = createFileRoute("/genres")({
   head: () => ({
     meta: [
-      { title: "Genres — Aniware" },
-      { name: "description", content: "Browse anime by genre on Aniware." },
+      { title: "Genres — animerewa" },
+      { name: "description", content: "Browse anime by genre on animerewa." },
     ],
   }),
   component: GenresPage,

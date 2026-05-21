@@ -311,7 +311,7 @@ async function probeUrl(url: string, provider: ReturnType<typeof detectProvider>
   try {
     const res = await fetch(url, {
       signal: ctrl.signal,
-      headers: { "user-agent": "Mozilla/5.0 AniwareHealthBot" },
+      headers: { "user-agent": "Mozilla/5.0 animerewaHealthBot" },
     });
     const html = await res.text();
     if (!res.ok) return { healthy: false, reason: `http-${res.status}` };

@@ -37,13 +37,13 @@ export function AnimeCard({ a }: { a: AnimeCardData }) {
           </div>
         </div>
         {a.score ? (
-          <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-md bg-background/80 backdrop-blur text-xs font-medium">
+          <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-md bg-background/80  text-xs font-medium">
             <Star className="w-3 h-3 fill-warning text-warning" />
             {a.score.toFixed(1)}
           </div>
         ) : null}
         {a.type ? (
-          <div className="absolute top-2 left-2 px-2 py-1 rounded-md bg-primary/80 backdrop-blur text-[10px] font-semibold uppercase tracking-wider text-primary-foreground">
+          <div className="absolute top-2 left-2 px-2 py-1 rounded-md bg-primary/80  text-[10px] font-semibold uppercase tracking-wider text-primary-foreground">
             {a.type}
           </div>
         ) : null}

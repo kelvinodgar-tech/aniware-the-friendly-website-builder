@@ -11,8 +11,8 @@ import { lovable } from "@/integrations/lovable/index";
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "Sign in — Aniware" },
-      { name: "description", content: "Sign in to Aniware to track your anime and continue watching across devices." },
+      { title: "Sign in — animerewa" },
+      { name: "description", content: "Sign in to animerewa to track your anime and continue watching across devices." },
     ],
   }),
   component: LoginPage,
@@ -75,7 +75,7 @@ function LoginPage() {
           {mode === "signin" ? "Welcome back" : "Create your account"}
         </h1>
         <p className="text-sm text-muted-foreground mb-6">
-          {mode === "signin" ? "Sign in to track & continue watching." : "Join Aniware to save your favorites."}
+          {mode === "signin" ? "Sign in to track & continue watching." : "Join animerewa to save your favorites."}
         </p>
 
         <Button onClick={onGoogle} variant="outline" className="w-full mb-4" disabled={loading}>
@@ -102,7 +102,7 @@ function LoginPage() {
         </form>
 
         <p className="text-sm text-center text-muted-foreground mt-6">
-          {mode === "signin" ? "New to Aniware?" : "Already have an account?"}{" "}
+          {mode === "signin" ? "New to animerewa?" : "Already have an account?"}{" "}
           <button onClick={() => setMode(mode === "signin" ? "signup" : "signin")} className="text-primary hover:underline">
             {mode === "signin" ? "Create one" : "Sign in"}
           </button>

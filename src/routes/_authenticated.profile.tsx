@@ -11,7 +11,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { getMyProfile, updateMyProfile } from "@/lib/user.functions";
 
 export const Route = createFileRoute("/_authenticated/profile")({
-  head: () => ({ meta: [{ title: "Profile — Aniware" }] }),
+  head: () => ({ meta: [{ title: "Profile — animerewa" }] }),
   component: ProfilePage,
 });
 
@@ -58,7 +58,7 @@ function ProfilePage() {
       <h1 className="font-display text-3xl font-bold mb-2 flex items-center gap-2">
         <UserIcon className="w-7 h-7 text-primary" /> Profile
       </h1>
-      <p className="text-muted-foreground mb-8">Your public Aniware identity.</p>
+      <p className="text-muted-foreground mb-8">Your public animerewa identity.</p>
 
       <div className="rounded-2xl bg-surface border border-border/50 p-6 md:p-8">
         <div className="flex items-center gap-4 mb-8">

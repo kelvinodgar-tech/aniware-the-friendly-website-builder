@@ -27,7 +27,7 @@ async function sleep(ms: number) {
 async function jget<T>(path: string, retries = 3): Promise<T> {
   for (let attempt = 0; attempt <= retries; attempt++) {
     const res = await fetch(`${BASE}${path}`, {
-      headers: { Accept: "application/json", "user-agent": "AniwareBot/1.0" },
+      headers: { Accept: "application/json", "user-agent": "animerewaBot/1.0" },
     });
     if (res.status === 429 || res.status === 503) {
       const retryAfter = Number(res.headers.get("retry-after")) || 0;
