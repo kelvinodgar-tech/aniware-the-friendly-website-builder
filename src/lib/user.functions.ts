@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 export const saveProgress = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -17,7 +18,19 @@ export const saveProgress = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    await supabase.from("watch_progress").upsert(
+    const isMarkerOnly = data.position === 0 && data.duration == null && data.completed == null;
+    if (isMarkerOnly) {
+      const { data: existing, error: readError } = await supabase
+        .from("watch_progress")
+        .select("user_id")
+        .eq("user_id", userId)
+        .eq("mal_id", data.malId)
+        .eq("episode_number", data.episode)
+        .maybeSingle();
+      if (readError) throw new Error(readError.message);
+      if (existing) return { ok: true };
+    }
+    const { error } = await supabase.from("watch_progress").upsert(
       {
         user_id: userId,
         mal_id: data.malId,
@@ -28,19 +41,25 @@ export const saveProgress = createServerFn({ method: "POST" })
       },
       { onConflict: "user_id,mal_id,episode_number" }
     );
+    if (error) throw new Error(error.message);
     return { ok: true };
   });
 
 export const getMyWatchlist = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { supabase, userId } = context;
-    const { data } = await supabase
+    const { userId } = context;
+    const { data: rows, error } = await supabaseAdmin
       .from("watchlist")
-      .select("mal_id, added_at, anime:anime_cache(*)")
+      .select("mal_id, added_at")
       .eq("user_id", userId)
       .order("added_at", { ascending: false });
-    return data ?? [];
+    if (error) throw new Error(error.message);
+    const malIds = (rows ?? []).map((r) => r.mal_id);
+    if (!malIds.length) return [];
+    const { data: anime } = await supabaseAdmin.from("anime_cache").select("*").in("mal_id", malIds);
+    const animeById = new Map((anime ?? []).map((a) => [a.mal_id, a]));
+    return (rows ?? []).map((r) => ({ ...r, anime: animeById.get(r.mal_id) ?? null }));
   });
 
 export const toggleWatchlist = createServerFn({ method: "POST" })
@@ -48,31 +67,51 @@ export const toggleWatchlist = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ malId: z.number().int().positive() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const { data: existing } = await supabase
+    const { data: existing, error: readError } = await supabase
       .from("watchlist")
       .select("mal_id")
       .eq("user_id", userId)
       .eq("mal_id", data.malId)
       .maybeSingle();
+    if (readError) throw new Error(readError.message);
     if (existing) {
-      await supabase.from("watchlist").delete().eq("user_id", userId).eq("mal_id", data.malId);
+      const { error } = await supabase.from("watchlist").delete().eq("user_id", userId).eq("mal_id", data.malId);
+      if (error) throw new Error(error.message);
       return { saved: false };
     }
-    await supabase.from("watchlist").insert({ user_id: userId, mal_id: data.malId });
+    const { error } = await supabase.from("watchlist").insert({ user_id: userId, mal_id: data.malId });
+    if (error) throw new Error(error.message);
+    return { saved: true };
+  });
+
+export const addToWatchlist = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ malId: z.number().int().positive() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { error } = await supabase
+      .from("watchlist")
+      .upsert({ user_id: userId, mal_id: data.malId }, { onConflict: "user_id,mal_id" });
+    if (error) throw new Error(error.message);
     return { saved: true };
   });
 
 export const getMyHistory = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { supabase, userId } = context;
-    const { data } = await supabase
+    const { userId } = context;
+    const { data: rows, error } = await supabaseAdmin
       .from("watch_progress")
-      .select("*, anime:anime_cache(*)")
+      .select("*")
       .eq("user_id", userId)
       .order("updated_at", { ascending: false })
       .limit(30);
-    return data ?? [];
+    if (error) throw new Error(error.message);
+    const malIds = Array.from(new Set((rows ?? []).map((r) => r.mal_id)));
+    if (!malIds.length) return [];
+    const { data: anime } = await supabaseAdmin.from("anime_cache").select("*").in("mal_id", malIds);
+    const animeById = new Map((anime ?? []).map((a) => [a.mal_id, a]));
+    return (rows ?? []).map((r) => ({ ...r, anime: animeById.get(r.mal_id) ?? null }));
   });
 
 export const getEpisodeProgress = createServerFn({ method: "POST" })
@@ -119,6 +158,20 @@ export const isMyAdmin = createServerFn({ method: "GET" })
       .eq("role", "admin")
       .maybeSingle();
     return { isAdmin: !!data, userId };
+  });
+
+export const requireAdminAccess = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { userId } = context;
+    const { data } = await supabaseAdmin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("role", "admin")
+      .maybeSingle();
+    if (!data) throw new Error("Not found");
+    return { ok: true };
   });
 
 export const getMyProfile = createServerFn({ method: "GET" })

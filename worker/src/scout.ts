@@ -1,5 +1,5 @@
 // Scout: poll Nyaa RSS for SubsPlease 720p releases, match to Jikan top airing,
-// enqueue missing episodes via the Aniware worker API.
+// enqueue missing episodes via the animerewa worker API.
 import Parser from "rss-parser";
 import { api } from "./api.js";
 

@@ -102,7 +102,7 @@ async function main() {
     ].filter(Boolean) as Array<Record<string, unknown>>;
 
     await api.complete(job.id, links);
-    console.log(`[ingest] done ${links.length} mirror(s)`);
+    console.log(`[ingest] done ${links.length} source(s)`);
   } catch (e: any) {
     console.error("[ingest] failed", e);
     try { await api.fail(job.id, String(e?.message ?? e).slice(0, 500), job.attempts); } catch {}

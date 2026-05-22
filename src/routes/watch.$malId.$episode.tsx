@@ -11,7 +11,6 @@ import { Badge } from "@/components/ui/badge";
 import { getEpisodeSources } from "@/lib/anime.functions";
 import { getEpisodeProgress, saveProgress } from "@/lib/user.functions";
 import { useAuth } from "@/hooks/use-auth";
-import { PROVIDER_LABEL } from "@/lib/providers";
 
 type EpisodeSource = {
   id: string;
@@ -68,7 +67,7 @@ function WatchPage() {
   const sources = (q.data?.sources ?? []) as EpisodeSource[];
   const anime = q.data?.anime;
 
-  // Language groups (SUB / DUB) — only show what actually has a mirror.
+  // Language groups (SUB / DUB) — only show what actually has a stream.
   const availableLangs = useMemo(() => {
     const set = new Set<string>();
     for (const s of sources) if (s.language) set.add(s.language);
@@ -158,7 +157,7 @@ function WatchPage() {
                 onProgress={onProgress}
               />
             ) : (
-              // For iframe mirrors: keying ONLY on source.id (not playerNonce of
+              // For iframe streams: keying ONLY on source.id (not playerNonce of
               // surrounding state) keeps the iframe mounted across UI changes.
               // Switching server within the same language swaps src only.
               <iframe
@@ -172,7 +171,7 @@ function WatchPage() {
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center text-center px-6">
               <AlertTriangle className="w-10 h-10 text-warning mb-3" />
-              <p className="font-semibold">No mirrors available for episode {ep}</p>
+              <p className="font-semibold">No streams available for episode {ep}</p>
               <p className="text-sm text-muted-foreground mt-1">Try a different episode or check back later.</p>
             </div>
           )}
@@ -224,7 +223,7 @@ function WatchPage() {
           Next <ChevronRight className="w-4 h-4 ml-1" />
         </Button>
 
-        {/* SUB / DUB segmented control — only languages with mirrors are shown */}
+        {/* SUB / DUB segmented control — only languages with streams are shown */}
         {availableLangs.length > 0 && (
           <div className="inline-flex rounded-md border border-border bg-surface/60 p-0.5">
             {availableLangs.map((l) => (
@@ -243,14 +242,14 @@ function WatchPage() {
           </div>
         )}
 
-        {/* Server picker — only within current language so switching never changes language */}
+        {/* Stream picker — only within current language so switching never changes language */}
         {langSources.length > 1 && (
           <Select value={provider} onValueChange={setProvider}>
-            <SelectTrigger className="w-40"><SelectValue placeholder="Server" /></SelectTrigger>
+            <SelectTrigger className="w-40"><SelectValue placeholder="Stream" /></SelectTrigger>
             <SelectContent>
-              {langSources.map((s) => (
+              {langSources.map((s, idx) => (
                 <SelectItem key={s.id} value={s.id}>
-                  {PROVIDER_LABEL[s.server_name as keyof typeof PROVIDER_LABEL] ?? s.server_name}
+                  Stream {idx + 1}
                   {s.quality ? ` · ${s.quality}` : ""}
                 </SelectItem>
               ))}
@@ -270,7 +269,7 @@ function WatchPage() {
         <div className="mt-2 flex flex-wrap gap-2">
           {current?.quality && <Badge variant="secondary">{current.quality}</Badge>}
           {current?.language && <Badge variant="outline" className="border-primary/40 text-primary">{current.language.toUpperCase()}</Badge>}
-          <Badge variant="outline">{langSources.length} mirror{langSources.length === 1 ? "" : "s"}</Badge>
+          <Badge variant="outline">{langSources.length} stream{langSources.length === 1 ? "" : "s"}</Badge>
         </div>
         {anime?.synopsis && <p className="mt-4 text-muted-foreground max-w-3xl line-clamp-4">{anime.synopsis}</p>}
       </div>

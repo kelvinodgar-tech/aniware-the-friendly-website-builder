@@ -1,7 +1,7 @@
-# Disabled — Aniware now provisions iframe sources on-demand from free
-# public CDNs (vidsrc, 2embed, miruro). No torrent/transcode/upload pipeline
+# Disabled — animerewa now provisions iframe sources on-demand.
+# No torrent/transcode/upload pipeline
 # is needed. Kept as a no-op so the file stays in repo history.
-name: Aniware Ingest (disabled)
+name: animerewa ingest disabled
 on:
   workflow_dispatch:
 jobs:

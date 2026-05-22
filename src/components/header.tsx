@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Search, User as UserIcon, LogOut, Shield, Heart, History } from "lucide-react";
+import { useState } from "react";
+import { Search, User as UserIcon, LogOut, Heart, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -13,21 +13,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { useServerFn } from "@tanstack/react-start";
-import { isMyAdmin } from "@/lib/user.functions";
 import logoMark from "@/assets/animerewa-logo.png";
 
 export function Header() {
   const { user } = useAuth();
   const [q, setQ] = useState("");
-  const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
-  const checkAdmin = useServerFn(isMyAdmin);
-
-  useEffect(() => {
-    if (!user) return setIsAdmin(false);
-    checkAdmin().then((r) => setIsAdmin(r.isAdmin)).catch(() => setIsAdmin(false));
-  }, [user, checkAdmin]);
 
   return (
     <header className="sticky top-0 z-50 bg-background/95 border-b border-border/60">
@@ -98,11 +89,6 @@ export function Header() {
                 <DropdownMenuItem asChild>
                   <Link to="/profile"><UserIcon className="w-4 h-4 mr-2" />Profile</Link>
                 </DropdownMenuItem>
-                {isAdmin && (
-                  <DropdownMenuItem asChild>
-                    <Link to="/admin"><Shield className="w-4 h-4 mr-2" />Admin</Link>
-                  </DropdownMenuItem>
-                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => supabase.auth.signOut()}>
                   <LogOut className="w-4 h-4 mr-2" />Sign out
