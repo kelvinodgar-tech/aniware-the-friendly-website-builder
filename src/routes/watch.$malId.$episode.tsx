@@ -67,7 +67,7 @@ function WatchPage() {
   const sources = (q.data?.sources ?? []) as EpisodeSource[];
   const anime = q.data?.anime;
 
-  // Language groups (SUB / DUB) — only show what actually has a mirror.
+  // Language groups (SUB / DUB) — only show what actually has a stream.
   const availableLangs = useMemo(() => {
     const set = new Set<string>();
     for (const s of sources) if (s.language) set.add(s.language);
@@ -157,7 +157,7 @@ function WatchPage() {
                 onProgress={onProgress}
               />
             ) : (
-              // For iframe mirrors: keying ONLY on source.id (not playerNonce of
+              // For iframe streams: keying ONLY on source.id (not playerNonce of
               // surrounding state) keeps the iframe mounted across UI changes.
               // Switching server within the same language swaps src only.
               <iframe
