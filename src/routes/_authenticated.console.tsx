@@ -19,7 +19,7 @@ import {
 } from "@/lib/anime.functions";
 import { requireAdminAccess } from "@/lib/user.functions";
 
-export const Route = createFileRoute("/_authenticated/admin")({
+export const Route = createFileRoute("/_authenticated/console")({
   beforeLoad: async () => {
     const { data } = await supabase.auth.getUser();
     if (!data.user) throw redirect({ to: "/login" });
