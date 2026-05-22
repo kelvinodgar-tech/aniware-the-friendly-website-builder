@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAnimeDetails } from "@/lib/anime.functions";
-import { toggleWatchlist, getMyWatchlist, getAnimeProgress } from "@/lib/user.functions";
+import { addToWatchlist, getMyWatchlist, getAnimeProgress } from "@/lib/user.functions";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 
@@ -28,7 +28,7 @@ function AnimePage() {
   const { user } = useAuth();
   const qc = useQueryClient();
   const detailsFn = useServerFn(getAnimeDetails);
-  const toggleFn = useServerFn(toggleWatchlist);
+  const addFn = useServerFn(addToWatchlist);
   const myListFn = useServerFn(getMyWatchlist);
   const progressFn = useServerFn(getAnimeProgress);
 
@@ -51,14 +51,11 @@ function AnimePage() {
   });
 
   const toggle = useMutation({
-    mutationFn: () => toggleFn({ data: { malId: id } }),
+    mutationFn: () => addFn({ data: { malId: id } }),
     onMutate: async () => {
       await qc.cancelQueries({ queryKey: ["watchlist"] });
       const prev = qc.getQueryData<any[]>(["watchlist"]);
-      // Optimistic: add a placeholder if not in list, remove if it is.
-      if (inList) {
-        qc.setQueryData<any[]>(["watchlist"], (old) => (old ?? []).filter((w) => w.mal_id !== id));
-      } else if (q.data?.anime) {
+      if (!inList && q.data?.anime) {
         qc.setQueryData<any[]>(["watchlist"], (old) => [{ mal_id: id, added_at: new Date().toISOString(), anime: q.data!.anime }, ...(old ?? [])]);
       }
       return { prev };
@@ -68,7 +65,7 @@ function AnimePage() {
       toast.error("Couldn't update your list");
     },
     onSuccess: (r) => {
-      toast.success(r.saved ? "Added to watchlist" : "Removed from watchlist");
+      toast.success("Added to watchlist");
       qc.invalidateQueries({ queryKey: ["watchlist"] });
     },
   });
@@ -142,7 +139,7 @@ function AnimePage() {
                 <Button
                   size="lg"
                   variant={inList ? "default" : "outline"}
-                  onClick={() => toggle.mutate()}
+                  onClick={() => { if (!inList) toggle.mutate(); }}
                   disabled={toggle.isPending}
                   className={inList ? "bg-primary/20 text-primary border border-primary/40 hover:bg-primary/30" : ""}
                 >
