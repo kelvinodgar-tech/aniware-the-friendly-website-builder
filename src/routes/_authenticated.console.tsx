@@ -148,7 +148,7 @@ function ConsolePage() {
 
       <section className="bg-surface border border-border/50 rounded-2xl p-6 shadow-card">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-display text-xl font-bold flex items-center gap-2"><Activity className="w-5 h-5" /> Mirrors ({links.data?.length ?? 0})</h2>
+          <h2 className="font-display text-xl font-bold flex items-center gap-2"><Activity className="w-5 h-5" /> Sources ({links.data?.length ?? 0})</h2>
           <Button onClick={() => batch.mutate()} disabled={batch.isPending} variant="outline" size="sm">
             <RefreshCw className={`w-4 h-4 mr-1 ${batch.isPending ? "animate-spin" : ""}`} /> Run health batch
           </Button>
