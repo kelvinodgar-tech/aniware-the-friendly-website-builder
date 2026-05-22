@@ -1,4 +1,4 @@
-// Tiny HTTP client to call the Aniware worker RPC endpoint.
+// Tiny HTTP client to call the animerewa worker RPC endpoint.
 // Replaces direct Supabase service-role access.
 import { env } from "./env.js";
 

@@ -4,7 +4,7 @@ function need(name: string): string {
   return v;
 }
 export const env = {
-  // The deployed Aniware app URL (e.g. https://project--<id>.lovable.app)
+  // The deployed animerewa app URL (e.g. https://project--<id>.lovable.app)
   APP_URL: need("APP_URL"),
   // Shared secret with the /api/public/worker/rpc endpoint
   WORKER_SECRET: need("WORKER_SECRET"),
