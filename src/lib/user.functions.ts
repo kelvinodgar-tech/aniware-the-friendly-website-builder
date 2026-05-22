@@ -84,6 +84,18 @@ export const toggleWatchlist = createServerFn({ method: "POST" })
     return { saved: true };
   });
 
+export const addToWatchlist = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ malId: z.number().int().positive() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { error } = await supabase
+      .from("watchlist")
+      .upsert({ user_id: userId, mal_id: data.malId }, { onConflict: "user_id,mal_id" });
+    if (error) throw new Error(error.message);
+    return { saved: true };
+  });
+
 export const getMyHistory = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
