@@ -171,7 +171,7 @@ function WatchPage() {
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center text-center px-6">
               <AlertTriangle className="w-10 h-10 text-warning mb-3" />
-              <p className="font-semibold">No mirrors available for episode {ep}</p>
+              <p className="font-semibold">No streams available for episode {ep}</p>
               <p className="text-sm text-muted-foreground mt-1">Try a different episode or check back later.</p>
             </div>
           )}
@@ -245,7 +245,7 @@ function WatchPage() {
         {/* Stream picker — only within current language so switching never changes language */}
         {langSources.length > 1 && (
           <Select value={provider} onValueChange={setProvider}>
-            <SelectTrigger className="w-40"><SelectValue placeholder="Server" /></SelectTrigger>
+            <SelectTrigger className="w-40"><SelectValue placeholder="Stream" /></SelectTrigger>
             <SelectContent>
               {langSources.map((s, idx) => (
                 <SelectItem key={s.id} value={s.id}>
