@@ -28,36 +28,46 @@ async function jget<T>(path: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+// Relevance filter: drop kids/hentai-leaning, unscored or low-score outliers,
+// and non-series formats unless explicitly requested.
+function isRelevant(a: JikanAnime) {
+  if (!a) return false;
+  const t = (a.type ?? "").toLowerCase();
+  if (t === "music" || t === "cm" || t === "pv") return false;
+  if (a.score != null && a.score < 5) return false;
+  return true;
+}
+
 export async function jikanTop(limit = 20) {
-  const d = await jget<{ data: JikanAnime[] }>(`/top/anime?limit=${limit}`);
-  return d.data;
+  const d = await jget<{ data: JikanAnime[] }>(`/top/anime?limit=${limit}&type=tv&filter=bypopularity&sfw=true`);
+  return (d.data ?? []).filter(isRelevant);
 }
 
 export async function jikanSeasonNow(limit = 20) {
-  const d = await jget<{ data: JikanAnime[] }>(`/seasons/now?limit=${limit}`);
-  return d.data;
+  const d = await jget<{ data: JikanAnime[] }>(`/seasons/now?limit=${limit}&filter=tv&sfw=true`);
+  return (d.data ?? []).filter(isRelevant);
 }
 
 export async function jikanSearch(query: string, page = 1) {
   const d = await jget<{ data: JikanAnime[] }>(
-    `/anime?q=${encodeURIComponent(query)}&page=${page}&limit=24&sfw=true`
+    `/anime?q=${encodeURIComponent(query)}&page=${page}&limit=24&sfw=true&order_by=score&sort=desc`
   );
-  return d.data;
+  return (d.data ?? []).filter(isRelevant);
 }
 
 export async function jikanGenres() {
-  const d = await jget<{ data: Array<{ mal_id: number; name: string; count: number }> }>(`/genres/anime`);
+  const d = await jget<{ data: Array<{ mal_id: number; name: string; count: number }> }>(`/genres/anime?filter=genres`);
   return d.data;
 }
 
 export async function jikanByGenre(genreId: number, page = 1) {
-  const d = await jget<{ data: JikanAnime[] }>(`/anime?genres=${genreId}&order_by=score&sort=desc&page=${page}&limit=24&sfw=true`);
-  return d.data;
+  const d = await jget<{ data: JikanAnime[] }>(`/anime?genres=${genreId}&order_by=score&sort=desc&page=${page}&limit=24&sfw=true&type=tv&min_score=6`);
+  return (d.data ?? []).filter(isRelevant);
 }
 
 export async function jikanSchedule(day: string) {
-  const d = await jget<{ data: JikanAnime[] }>(`/schedules?filter=${day}&sfw=true&limit=25`);
-  return d.data;
+  const d = await jget<{ data: JikanAnime[] }>(`/schedules?filter=${day}&sfw=true&limit=25&kids=false`);
+  return (d.data ?? []).filter(isRelevant);
 }
 
 export async function jikanDetails(malId: number) {

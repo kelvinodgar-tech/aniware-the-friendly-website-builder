@@ -133,9 +133,8 @@ function AdminPage() {
             <Select value={form.server_name} onValueChange={(v) => setForm({ ...form, server_name: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
+                <SelectItem value="anikoto">Anikoto</SelectItem>
                 <SelectItem value="direct">Direct / HLS</SelectItem>
-                <SelectItem value="streamtape">Streamtape</SelectItem>
-                <SelectItem value="mp4upload">Mp4Upload</SelectItem>
                 <SelectItem value="generic">Generic</SelectItem>
               </SelectContent>
             </Select>
