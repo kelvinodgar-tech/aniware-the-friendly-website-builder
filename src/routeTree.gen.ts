@@ -25,7 +25,7 @@ import { Route as AnimeMalIdRouteImport } from './routes/anime.$malId'
 import { Route as AuthenticatedWatchlistRouteImport } from './routes/_authenticated.watchlist'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated.profile'
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated.history'
-import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
+import { Route as AuthenticatedConsoleRouteImport } from './routes/_authenticated.console'
 import { Route as WatchMalIdEpisodeRouteImport } from './routes/watch.$malId.$episode'
 import { Route as ApiPublicSyncAnikotoRouteImport } from './routes/api/public/sync-anikoto'
 import { Route as ApiPublicScoutRouteImport } from './routes/api/public/scout'
@@ -111,9 +111,9 @@ const AuthenticatedHistoryRoute = AuthenticatedHistoryRouteImport.update({
   path: '/history',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
+const AuthenticatedConsoleRoute = AuthenticatedConsoleRouteImport.update({
+  id: '/console',
+  path: '/console',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const WatchMalIdEpisodeRoute = WatchMalIdEpisodeRouteImport.update({
@@ -153,7 +153,7 @@ export interface FileRoutesByFullPath {
   '/schedule': typeof ScheduleRoute
   '/search': typeof SearchRoute
   '/terms': typeof TermsRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/console': typeof AuthenticatedConsoleRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/watchlist': typeof AuthenticatedWatchlistRoute
@@ -176,7 +176,7 @@ export interface FileRoutesByTo {
   '/schedule': typeof ScheduleRoute
   '/search': typeof SearchRoute
   '/terms': typeof TermsRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/console': typeof AuthenticatedConsoleRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/watchlist': typeof AuthenticatedWatchlistRoute
@@ -201,7 +201,7 @@ export interface FileRoutesById {
   '/schedule': typeof ScheduleRoute
   '/search': typeof SearchRoute
   '/terms': typeof TermsRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/console': typeof AuthenticatedConsoleRoute
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/watchlist': typeof AuthenticatedWatchlistRoute
@@ -226,7 +226,7 @@ export interface FileRouteTypes {
     | '/schedule'
     | '/search'
     | '/terms'
-    | '/admin'
+    | '/console'
     | '/history'
     | '/profile'
     | '/watchlist'
@@ -249,7 +249,7 @@ export interface FileRouteTypes {
     | '/schedule'
     | '/search'
     | '/terms'
-    | '/admin'
+    | '/console'
     | '/history'
     | '/profile'
     | '/watchlist'
@@ -273,7 +273,7 @@ export interface FileRouteTypes {
     | '/schedule'
     | '/search'
     | '/terms'
-    | '/_authenticated/admin'
+    | '/_authenticated/console'
     | '/_authenticated/history'
     | '/_authenticated/profile'
     | '/_authenticated/watchlist'
@@ -421,11 +421,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHistoryRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/admin': {
-      id: '/_authenticated/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+    '/_authenticated/console': {
+      id: '/_authenticated/console'
+      path: '/console'
+      fullPath: '/console'
+      preLoaderRoute: typeof AuthenticatedConsoleRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/watch/$malId/$episode': {
@@ -467,14 +467,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteChildren {
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedConsoleRoute: typeof AuthenticatedConsoleRoute
   AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedWatchlistRoute: typeof AuthenticatedWatchlistRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedConsoleRoute: AuthenticatedConsoleRoute,
   AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedWatchlistRoute: AuthenticatedWatchlistRoute,
@@ -507,3 +507,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
