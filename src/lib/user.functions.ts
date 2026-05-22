@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 export const saveProgress = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -34,13 +35,18 @@ export const saveProgress = createServerFn({ method: "POST" })
 export const getMyWatchlist = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { supabase, userId } = context;
-    const { data } = await supabase
+    const { userId } = context;
+    const { data: rows, error } = await supabaseAdmin
       .from("watchlist")
-      .select("mal_id, added_at, anime:anime_cache(*)")
+      .select("mal_id, added_at")
       .eq("user_id", userId)
       .order("added_at", { ascending: false });
-    return data ?? [];
+    if (error) throw new Error(error.message);
+    const malIds = (rows ?? []).map((r) => r.mal_id);
+    if (!malIds.length) return [];
+    const { data: anime } = await supabaseAdmin.from("anime_cache").select("*").in("mal_id", malIds);
+    const animeById = new Map((anime ?? []).map((a) => [a.mal_id, a]));
+    return (rows ?? []).map((r) => ({ ...r, anime: animeById.get(r.mal_id) ?? null }));
   });
 
 export const toggleWatchlist = createServerFn({ method: "POST" })
@@ -65,14 +71,19 @@ export const toggleWatchlist = createServerFn({ method: "POST" })
 export const getMyHistory = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { supabase, userId } = context;
-    const { data } = await supabase
+    const { userId } = context;
+    const { data: rows, error } = await supabaseAdmin
       .from("watch_progress")
-      .select("*, anime:anime_cache(*)")
+      .select("*")
       .eq("user_id", userId)
       .order("updated_at", { ascending: false })
       .limit(30);
-    return data ?? [];
+    if (error) throw new Error(error.message);
+    const malIds = Array.from(new Set((rows ?? []).map((r) => r.mal_id)));
+    if (!malIds.length) return [];
+    const { data: anime } = await supabaseAdmin.from("anime_cache").select("*").in("mal_id", malIds);
+    const animeById = new Map((anime ?? []).map((a) => [a.mal_id, a]));
+    return (rows ?? []).map((r) => ({ ...r, anime: animeById.get(r.mal_id) ?? null }));
   });
 
 export const getEpisodeProgress = createServerFn({ method: "POST" })
