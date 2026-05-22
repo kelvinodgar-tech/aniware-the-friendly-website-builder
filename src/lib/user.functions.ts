@@ -132,6 +132,20 @@ export const isMyAdmin = createServerFn({ method: "GET" })
     return { isAdmin: !!data, userId };
   });
 
+export const requireAdminAccess = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { userId } = context;
+    const { data } = await supabaseAdmin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("role", "admin")
+      .maybeSingle();
+    if (!data) throw new Error("Not found");
+    return { ok: true };
+  });
+
 export const getMyProfile = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
