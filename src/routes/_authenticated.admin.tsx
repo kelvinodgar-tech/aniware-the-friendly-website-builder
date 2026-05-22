@@ -1,9 +1,9 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Plus, RefreshCw, Trash2, Activity, Shield } from "lucide-react";
+import { Plus, RefreshCw, Trash2, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,32 +17,36 @@ import {
   checkOneLink,
   batchHealthCheck,
 } from "@/lib/anime.functions";
-import { isMyAdmin } from "@/lib/user.functions";
+import { requireAdminAccess } from "@/lib/user.functions";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   beforeLoad: async () => {
     const { data } = await supabase.auth.getUser();
     if (!data.user) throw redirect({ to: "/login" });
   },
-  head: () => ({ meta: [{ title: "Admin — animerewa" }] }),
+  head: () => ({ meta: [{ title: "Console — animerewa" }] }),
   component: AdminPage,
 });
 
 function AdminPage() {
-  const adminFn = useServerFn(isMyAdmin);
+  const accessFn = useServerFn(requireAdminAccess);
   const listFn = useServerFn(listAllMediaLinks);
   const saveFn = useServerFn(upsertMediaLink);
   const delFn = useServerFn(deleteMediaLink);
   const checkFn = useServerFn(checkOneLink);
   const batchFn = useServerFn(batchHealthCheck);
 
-  const admin = useQuery({ queryKey: ["isAdmin"], queryFn: () => adminFn() });
+  const access = useQuery({ queryKey: ["console-access"], queryFn: () => accessFn(), retry: false });
   const qc = useQueryClient();
   const links = useQuery({
-    queryKey: ["adminLinks"],
+    queryKey: ["consoleLinks"],
     queryFn: () => listFn(),
-    enabled: admin.data?.isAdmin === true,
+    enabled: access.data?.ok === true,
   });
+
+  useEffect(() => {
+    if (access.isError) window.location.assign("/");
+  }, [access.isError]);
 
   const [form, setForm] = useState({
     mal_id: "", episode_number: "1", server_name: "direct",
@@ -68,50 +72,36 @@ function AdminPage() {
     onSuccess: () => {
       toast.success("Link saved");
       setForm({ ...form, embed_url: "", direct_download_url: "", subtitle_url: "" });
-      qc.invalidateQueries({ queryKey: ["adminLinks"] });
+      qc.invalidateQueries({ queryKey: ["consoleLinks"] });
     },
     onError: (e: any) => toast.error(e.message),
   });
 
   const del = useMutation({
     mutationFn: (id: string) => delFn({ data: { id } }),
-    onSuccess: () => { toast.success("Deleted"); qc.invalidateQueries({ queryKey: ["adminLinks"] }); },
+    onSuccess: () => { toast.success("Deleted"); qc.invalidateQueries({ queryKey: ["consoleLinks"] }); },
   });
 
   const check = useMutation({
     mutationFn: (id: string) => checkFn({ data: { id } }),
     onSuccess: (r) => {
       toast[r.healthy ? "success" : "error"](r.healthy ? "Healthy" : `Broken: ${r.reason}`);
-      qc.invalidateQueries({ queryKey: ["adminLinks"] });
+      qc.invalidateQueries({ queryKey: ["consoleLinks"] });
     },
   });
 
   const batch = useMutation({
     mutationFn: () => batchFn(),
-    onSuccess: (r) => { toast.success(`Checked ${r.checked} links`); qc.invalidateQueries({ queryKey: ["adminLinks"] }); },
+    onSuccess: (r) => { toast.success(`Checked ${r.checked} links`); qc.invalidateQueries({ queryKey: ["consoleLinks"] }); },
   });
 
-  if (admin.isLoading) return <div className="p-10 text-center">Checking permissions…</div>;
-  if (!admin.data?.isAdmin) {
-    return (
-      <div className="container mx-auto px-4 py-20 max-w-md text-center">
-        <Shield className="w-12 h-12 text-primary mx-auto mb-4" />
-        <h1 className="font-display text-2xl font-bold mb-2">Admin only</h1>
-        <p className="text-muted-foreground text-sm">
-          You're signed in but don't have admin access. Promote your account from the backend:
-          <code className="block mt-3 p-3 bg-surface rounded text-xs">
-            INSERT INTO user_roles (user_id, role) VALUES ('{admin.data?.userId}', 'admin');
-          </code>
-        </p>
-      </div>
-    );
-  }
+  if (access.isLoading || !access.data?.ok) return null;
 
   return (
     <div className="container mx-auto px-4 py-10 space-y-10">
       <div>
         <h1 className="font-display text-3xl font-bold flex items-center gap-2">
-          <Shield className="w-7 h-7 text-primary" /> Admin
+          Source console
         </h1>
         <p className="text-muted-foreground">Manage media mirrors and provider health.</p>
       </div>
