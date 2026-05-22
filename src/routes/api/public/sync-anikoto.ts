@@ -7,7 +7,7 @@ import { runAnikotoSync } from "@/lib/anikoto-sync.server";
 
 async function handle() {
   try {
-    const result = await runAnikotoSync(6);
+    const result = await runAnikotoSync(15);
     return Response.json({ ok: true, ...result });
   } catch (e: any) {
     console.error("[sync-anikoto] failed", e);

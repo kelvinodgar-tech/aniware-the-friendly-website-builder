@@ -58,7 +58,7 @@ export async function refreshSeriesEpisodes(malId: number, externalId: string | 
  *   If retries are exhausted, we save the cursor and stop gracefully.
  * - Resumes from the saved cursor; wraps to page 1 on full pass.
  */
-export async function runAnikotoSync(maxPages = 6) {
+export async function runAnikotoSync(maxPages = 15) {
   const { data: state } = await supabaseAdmin
     .from("sync_state")
     .select("*")
