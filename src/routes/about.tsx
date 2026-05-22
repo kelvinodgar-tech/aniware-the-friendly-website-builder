@@ -14,14 +14,13 @@ export const Route = createFileRoute("/about")({
     <LegalPage title="About animerewa">
       <p>
         animerewa is a modern anime catalog and watch hub built around three ideas:
-        beautiful design, lightning-fast browsing, and resilience through multiple
-        third-party mirrors.
+        beautiful design, lightning-fast browsing, and resilient stream sourcing.
       </p>
       <h2>What we do</h2>
       <p>
         We index titles from public sources (MyAnimeList via Jikan), let you build
-        a watchlist, track your progress across episodes, and stream from a rotating
-        set of unaffiliated mirror providers.
+        a watchlist, track your progress across episodes, and stream from available
+        third-party sources.
       </p>
       <h2>What we don't do</h2>
       <p>

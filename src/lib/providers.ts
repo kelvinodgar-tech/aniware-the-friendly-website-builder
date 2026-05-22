@@ -1,4 +1,4 @@
-// Provider abstraction. The catalog uses Anikoto iframe mirrors keyed by language (sub/dub).
+// Provider abstraction. The catalog uses Anikoto iframe sources keyed by language (sub/dub).
 // Direct video/HLS URLs are also supported when present.
 
 export type ProviderName = "direct" | "anikoto" | "generic";
@@ -6,7 +6,7 @@ export type ProviderName = "direct" | "anikoto" | "generic";
 export const PROVIDER_LABEL: Record<ProviderName, string> = {
   direct: "Direct player",
   anikoto: "Anikoto",
-  generic: "Mirror",
+  generic: "Stream",
 };
 
 export const PROVIDER_PRIORITY: Record<ProviderName, number> = {

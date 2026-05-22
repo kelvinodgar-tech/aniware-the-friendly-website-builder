@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Search, User as UserIcon, LogOut, Heart, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
