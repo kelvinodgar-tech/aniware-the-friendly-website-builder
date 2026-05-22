@@ -1,12 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
+import logoMark from "@/assets/animerewa-logo.png";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -49,25 +48,11 @@ function LoginPage() {
     }
   };
 
-  const onGoogle = async () => {
-    setLoading(true);
-    try {
-      const res = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-      if (res.error) throw res.error;
-      if (!res.redirected) navigate({ to: "/" });
-    } catch (e: any) {
-      toast.error(e.message ?? "Google sign-in failed");
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="container mx-auto px-4 py-16 max-w-md">
       <Link to="/" className="flex items-center gap-2 mb-8 justify-center">
-        <div className="w-9 h-9 rounded-lg bg-gradient-primary flex items-center justify-center shadow-glow">
-          <Sparkles className="w-5 h-5 text-primary-foreground" />
-        </div>
-        <span className="font-display text-2xl font-bold">Ani<span className="text-primary">ware</span></span>
+        <img src={logoMark} alt="animerewa" width={36} height={36} className="w-9 h-9 rounded-lg shadow-glow" />
+        <span className="font-display text-2xl font-bold">anime<span className="text-primary">rewa</span></span>
       </Link>
 
       <div className="rounded-2xl bg-surface border border-border/50 shadow-card p-8">
@@ -77,15 +62,6 @@ function LoginPage() {
         <p className="text-sm text-muted-foreground mb-6">
           {mode === "signin" ? "Sign in to track & continue watching." : "Join animerewa to save your favorites."}
         </p>
-
-        <Button onClick={onGoogle} variant="outline" className="w-full mb-4" disabled={loading}>
-          Continue with Google
-        </Button>
-
-        <div className="relative my-4 text-center text-xs text-muted-foreground">
-          <span className="bg-surface px-2 relative z-10">or</span>
-          <div className="absolute inset-x-0 top-1/2 border-t border-border/50" />
-        </div>
 
         <form onSubmit={onSubmit} className="space-y-4">
           <div>
