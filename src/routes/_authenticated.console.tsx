@@ -25,10 +25,10 @@ export const Route = createFileRoute("/_authenticated/console")({
     if (!data.user) throw redirect({ to: "/login" });
   },
   head: () => ({ meta: [{ title: "Console — animerewa" }] }),
-  component: AdminPage,
+  component: ConsolePage,
 });
 
-function AdminPage() {
+function ConsolePage() {
   const accessFn = useServerFn(requireAdminAccess);
   const listFn = useServerFn(listAllMediaLinks);
   const saveFn = useServerFn(upsertMediaLink);
@@ -103,11 +103,11 @@ function AdminPage() {
         <h1 className="font-display text-3xl font-bold flex items-center gap-2">
           Source console
         </h1>
-        <p className="text-muted-foreground">Manage media mirrors and provider health.</p>
+        <p className="text-muted-foreground">Manage media sources and stream health.</p>
       </div>
 
       <section className="bg-surface border border-border/50 rounded-2xl p-6 shadow-card">
-        <h2 className="font-display text-xl font-bold mb-4 flex items-center gap-2"><Plus className="w-5 h-5" /> Add / update mirror</h2>
+        <h2 className="font-display text-xl font-bold mb-4 flex items-center gap-2"><Plus className="w-5 h-5" /> Add / update source</h2>
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
           <div><Label>MAL ID</Label><Input value={form.mal_id} onChange={(e) => setForm({ ...form, mal_id: e.target.value })} placeholder="52991" /></div>
           <div><Label>Episode</Label><Input type="number" value={form.episode_number} onChange={(e) => setForm({ ...form, episode_number: e.target.value })} /></div>
@@ -142,7 +142,7 @@ function AdminPage() {
           <div className="md:col-span-3"><Label>Subtitle .vtt URL (optional)</Label><Input value={form.subtitle_url} onChange={(e) => setForm({ ...form, subtitle_url: e.target.value })} /></div>
         </div>
         <Button onClick={() => save.mutate()} disabled={save.isPending || !form.mal_id || !form.embed_url} className="mt-5 bg-gradient-primary shadow-glow">
-          {save.isPending ? "Saving…" : "Save mirror"}
+          {save.isPending ? "Saving…" : "Save source"}
         </Button>
       </section>
 
@@ -172,7 +172,7 @@ function AdminPage() {
               </Button>
             </div>
           ))}
-          {(links.data?.length ?? 0) === 0 && <p className="text-center text-muted-foreground py-10">No mirrors yet.</p>}
+          {(links.data?.length ?? 0) === 0 && <p className="text-center text-muted-foreground py-10">No sources yet.</p>}
         </div>
       </section>
     </div>
