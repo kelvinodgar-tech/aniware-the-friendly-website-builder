@@ -18,7 +18,19 @@ export const saveProgress = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    await supabase.from("watch_progress").upsert(
+    const isMarkerOnly = data.position === 0 && data.duration == null && data.completed == null;
+    if (isMarkerOnly) {
+      const { data: existing, error: readError } = await supabase
+        .from("watch_progress")
+        .select("user_id")
+        .eq("user_id", userId)
+        .eq("mal_id", data.malId)
+        .eq("episode_number", data.episode)
+        .maybeSingle();
+      if (readError) throw new Error(readError.message);
+      if (existing) return { ok: true };
+    }
+    const { error } = await supabase.from("watch_progress").upsert(
       {
         user_id: userId,
         mal_id: data.malId,
@@ -29,6 +41,7 @@ export const saveProgress = createServerFn({ method: "POST" })
       },
       { onConflict: "user_id,mal_id,episode_number" }
     );
+    if (error) throw new Error(error.message);
     return { ok: true };
   });
 
@@ -54,17 +67,20 @@ export const toggleWatchlist = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ malId: z.number().int().positive() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const { data: existing } = await supabase
+    const { data: existing, error: readError } = await supabase
       .from("watchlist")
       .select("mal_id")
       .eq("user_id", userId)
       .eq("mal_id", data.malId)
       .maybeSingle();
+    if (readError) throw new Error(readError.message);
     if (existing) {
-      await supabase.from("watchlist").delete().eq("user_id", userId).eq("mal_id", data.malId);
+      const { error } = await supabase.from("watchlist").delete().eq("user_id", userId).eq("mal_id", data.malId);
+      if (error) throw new Error(error.message);
       return { saved: false };
     }
-    await supabase.from("watchlist").insert({ user_id: userId, mal_id: data.malId });
+    const { error } = await supabase.from("watchlist").insert({ user_id: userId, mal_id: data.malId });
+    if (error) throw new Error(error.message);
     return { saved: true };
   });
 
